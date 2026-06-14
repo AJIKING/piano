@@ -11,7 +11,7 @@
 | `Clock` | 「最終練習 昨日」等の相対日付、習得度の更新日時 | システム時刻 / 固定 fake |
 | `ScoreRepository` | 収録曲の供給 | 同梱データ / テスト用最小 fixture |
 | `LibraryStore` | ユーザー楽譜・習得度・最終練習日時の永続化 | デバイスストレージ / インメモリ fake |
-| `AudioEngine` | 発音・再生(Tone.js 相当の副作用) | flutter_soloud 波形シンセ / 呼び出しを記録するだけの fake(音を鳴らさない) |
+| `AudioEngine` | 発音・再生(Tone.js 相当の副作用) | flutter_midi_pro + SoundFont / 呼び出しを記録するだけの fake(音を鳴らさない) |
 
 通信がないため `ApiClient` は不要。`Random` 依存もない(プロトタイプの旋律はデモ固定で、シャッフル要素がない)。再生のタイミングは実時間ではなく `Clock` / `fake_async` で進める。
 

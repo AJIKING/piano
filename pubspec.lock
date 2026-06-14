@@ -115,14 +115,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
-  flutter_soloud:
+  flutter_midi_pro:
     dependency: "direct main"
     description:
-      name: flutter_soloud
-      sha256: "54eab9cf96fe641b1c6da8362ff68e5a569d5f1d02ae1571b41e38a8b2297714"
+      name: flutter_midi_pro
+      sha256: "774cd928e9478a3dbf5d037170772fb83fd4a1a64d306d9271b0c1464ca486ab"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.9"
+    version: "3.1.6"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -146,22 +146,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  http:
-    dependency: transitive
-    description:
-      name: http
-      sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.0"
-  http_parser:
-    dependency: transitive
-    description:
-      name: http_parser
-      sha256: "178d74305e7866013777bab2c3d8726205dc5a4dd935297175b19a23a2e66571"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.2"
   integration_test:
     dependency: "direct dev"
     description: flutter

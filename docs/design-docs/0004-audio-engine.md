@@ -1,16 +1,16 @@
 # ADR 0004: ピアノ音源・再生エンジンの方式
 
-- 状態: 採用
-- 日付: 2026-06-14
+- 状態: 採用(2026-06-15 改訂: 波形シンセ → SoundFont)
+- 日付: 2026-06-14 / 改訂 2026-06-15
 
 ## 決定
 
-発音・再生は **`AudioEngine` 境界(pure Dart のインターフェース)の裏に隠す**。本番実装は **flutter_soloud の波形シンセ(三角波)** を採用し、音高ごとに波形ソースを用意して発音する(音源アセット不要)。本番実装 `lib/src/data/soloud_audio_engine.dart`(`SoLoudAudioEngine`)はプラグインのアダプタで、**自動テストの対象外**(`SystemClock` と同じ扱い)。テストでは呼び出しを記録する fake(`RecordingAudioEngine`)に差し替える。
+発音・再生は **`AudioEngine` 境界(pure Dart のインターフェース)の裏に隠す**。本番実装は **flutter_midi_pro + SoundFont(.sf2)** を採用する。音名を MIDI ノート番号(`Note.midiOf`)に変換し、ピアノ音色の SoundFont で発音する。本番実装 `lib/src/data/midi_pro_audio_engine.dart`(`MidiProAudioEngine`)はプラグインのアダプタで、**自動テストの対象外**(`SystemClock` と同じ扱い)。テストでは呼び出しを記録する fake(`RecordingAudioEngine`)に差し替える。
 
-- `AudioEngine` の責務は最小に保つ: 初期化、単音の発音(音高 + 余韻)、停止。
+- `AudioEngine` の責務は最小に保つ: 初期化(SoundFont ロード)、単音の発音(音高 + 余韻)、停止。
 - **再生スケジュール(旋律 → 各音符の発音タイミング、テンポ追従、メトロノーム)は pure Dart のロジック**として `domain/score/`(`PlaybackSchedule`)に置き、実時間ではなく `Clock` / `fake_async` で駆動する。`AudioEngine` は「いつ鳴らすか」を持たず「鳴らす」だけにする。
-- 音高 → 周波数の変換(平均律・A4=440)は `domain/score/note.dart`(`Note.frequencyOf`)に置き、unit test で守る。
-- **サンプルピアノ音源(Salamander 等)への差し替えは、音声アセットを同梱できる段階で本 ADR を改訂して行う**。境界が同じなのでアダプタ 1 ファイルの置き換えで済む。
+- 音色は `assets/audio/piano.sf2` の SoundFont に依存する(置き方は `assets/audio/README.md`)。`.sf2` が無くてもアプリは起動し、発音だけ無音になる。
+- **改訂前**(2026-06-14)は flutter_soloud の三角波シンセ(`SoLoudAudioEngine`)だったが、「ピアノ音に聞こえない(純音すぎる)」ため SoundFont 方式へ差し替えた。境界が同じなのでアダプタ 1 ファイルの置き換えで済んだ(`flutter_soloud` 依存は削除)。
 
 ## 背景
 

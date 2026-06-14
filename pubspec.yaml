@@ -16,8 +16,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   # ライブラリ(ユーザー楽譜・習得度)の永続化。ADR 0001 参照。
   shared_preferences: ^2.5.5
-  # 発音・再生(AudioEngine 境界の本番実装)。波形シンセ。ADR 0004 参照。
-  flutter_soloud: ^4.0.9
+  # 発音・再生(AudioEngine 境界の本番実装)。SoundFont(.sf2)シンセ。ADR 0004 参照。
+  flutter_midi_pro: ^3.1.6
 
 dev_dependencies:
   flutter_test:
@@ -33,10 +33,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # アプリ内アセット(収録曲のサンプル音源等)はここに追加する。
-  # 音源プラグインと音声アセットの導入は ADR 0004 の方針に従い UI/再生実装時に行う。
-  # assets:
-  #   - assets/audio/
+  # 音源アセット。ピアノ音色の SoundFont を assets/audio/piano.sf2 に置く
+  # (詳細は assets/audio/README.md)。ディレクトリ宣言なので .sf2 を入れれば自動同梱。
+  assets:
+    - assets/audio/
 
   # カスタムフォント。プロトタイプ docs/prototype/etude-piano-app.html では
   # Fraunces(ラテン装飾)/ Noto Sans JP(本文)/ Shippori Mincho(明朝)を使う。

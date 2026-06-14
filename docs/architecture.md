@@ -40,7 +40,7 @@ domain / core にインターフェース、data に本番実装、テストに 
 | `Clock` | `core/` | システム時刻(`SystemClock`) | 固定 fake |
 | `ScoreRepository` | `domain/score/` | 同梱 Dart データ(`BundledScoreRepository`) | 最小 fixture |
 | `LibraryStore` | `domain/library/` | shared_preferences(`PrefsLibraryStore`) | インメモリ fake |
-| `AudioEngine` | `domain/audio/` | 波形シンセ(`SoLoudAudioEngine`、flutter_soloud、テスト対象外) | 呼び出し記録 fake |
+| `AudioEngine` | `domain/audio/` | SoundFont シンセ(`MidiProAudioEngine`、flutter_midi_pro、テスト対象外) | 呼び出し記録 fake |
 
 composition root は 3 つ。組み立てロジックは共通化し、差分(clock / store / audio)だけを変える。
 
@@ -73,7 +73,7 @@ lib/
     │   ├── score_data.dart                 # 収録曲データ本体(旋律)
     │   ├── bundled_score_repository.dart    # ScoreRepository の同梱実装
     │   ├── prefs_library_store.dart         # LibraryStore の永続化実装
-    │   └── soloud_audio_engine.dart         # AudioEngine の本番実装(flutter_soloud 波形シンセ。テスト対象外)
+    │   └── midi_pro_audio_engine.dart       # AudioEngine の本番実装(flutter_midi_pro + SoundFont。テスト対象外)
     ├── application/
     │   ├── dependencies.dart        # 差し替え境界の束(composition root が生成)
     │   ├── library_controller.dart  # 曲一覧・現在曲・新規作成(ChangeNotifier)
