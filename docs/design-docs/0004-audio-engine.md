@@ -8,7 +8,7 @@
 発音・再生は **`AudioEngine` 境界(pure Dart のインターフェース)の裏に隠す**。本番実装は **flutter_midi_pro + SoundFont(.sf2)** を採用する。音名を MIDI ノート番号(`Note.midiOf`)に変換し、ピアノ音色の SoundFont で発音する。本番実装 `lib/src/data/midi_pro_audio_engine.dart`(`MidiProAudioEngine`)はプラグインのアダプタで、**自動テストの対象外**(`SystemClock` と同じ扱い)。テストでは呼び出しを記録する fake(`RecordingAudioEngine`)に差し替える。
 
 - `AudioEngine` の責務は最小に保つ: 初期化(SoundFont ロード)、単音の発音(音高 + 余韻)、停止。
-- **再生スケジュール(旋律 → 各音符の発音タイミング、テンポ追従、メトロノーム)は pure Dart のロジック**として `domain/score/`(`PlaybackSchedule`)に置き、実時間ではなく `Clock` / `fake_async` で駆動する。`AudioEngine` は「いつ鳴らすか」を持たず「鳴らす」だけにする。
+- **再生スケジュール(旋律 → 各音符の発音タイミング、テンポ追従、メトロノーム)は `PracticeController` が拍ベースで持つ**(`_elapsedBeats` を毎フレーム bpm に応じて進める)。実時間ではなく `fake_async` で `Timer` を進めて検証する。再生中のテンポ変更が即反映される。`AudioEngine` は「いつ鳴らすか」を持たず「鳴らす」だけにする。
 - 音色は `assets/audio/piano.sf2` の SoundFont に依存する(置き方は `assets/audio/README.md`)。`.sf2` が無くてもアプリは起動し、発音だけ無音になる。
 - **改訂前**(2026-06-14)は flutter_soloud の三角波シンセ(`SoLoudAudioEngine`)だったが、「ピアノ音に聞こえない(純音すぎる)」ため SoundFont 方式へ差し替えた。境界が同じなのでアダプタ 1 ファイルの置き換えで済んだ(`flutter_soloud` 依存は削除)。
 

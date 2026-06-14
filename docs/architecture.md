@@ -63,7 +63,6 @@ lib/
     │   │   ├── note.dart              # Note(pitch/beat/duration)・音高パース・diatonic step
     │   │   ├── piece.dart             # Piece(曲・習得度・最終練習日時)
     │   │   ├── score_geometry.dart    # 拍↔X、音高↔Y などの譜面ジオメトリ(pure Dart)
-    │   │   ├── playback_schedule.dart # 旋律+bpm → 発音イベント列(pure Dart)
     │   │   └── score_repository.dart  # 収録曲供給インターフェース
     │   ├── library/
     │   │   └── library_store.dart     # ユーザー楽譜・習得度の永続化インターフェース

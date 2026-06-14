@@ -93,7 +93,7 @@ void main() {
       });
     });
 
-    test('playheadBeats は再生開始時のテンポで換算する(途中のテンポ変更に揺れない)', () {
+    test('BPM 変更の瞬間に再生位置(playheadBeats)は飛ばない', () {
       fakeAsync((async) {
         final c = PracticeController(
           piece: twoBeatMelody(),
@@ -101,10 +101,34 @@ void main() {
           bpm: 60,
         );
         c.play();
-        async.elapse(const Duration(milliseconds: 1000)); // 60bpm で 1 拍
-        // 再生中にスライダーを動かしても、再生ヘッドは play 時のテンポ換算のまま。
+        async.elapse(const Duration(milliseconds: 1000)); // 60bpm で約 1 拍
+        // テンポを変えても、その瞬間に再生位置はジャンプしない(以後の進む速さが変わるだけ)。
         c.setBpm(120);
         expect(c.playheadBeats, closeTo(1.0, 0.05));
+        c.stop();
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
+    test('同 beat の音符(和音)はすべて発音される', () {
+      fakeAsync((async) {
+        final audio = RecordingAudioEngine();
+        final piece = Piece(
+          id: 'p',
+          title: 't',
+          composer: 'c',
+          notes: const [
+            Note(pitch: 'C4', beat: 0, duration: 1),
+            Note(pitch: 'E4', beat: 0, duration: 1),
+            Note(pitch: 'G4', beat: 0, duration: 1),
+          ],
+        );
+        final c = PracticeController(piece: piece, audioEngine: audio, bpm: 60);
+        c.play();
+        async.elapse(const Duration(milliseconds: 100));
+        // 3 音とも鳴る(正準順 C4→E4→G4)。
+        expect(audio.playedPitches, ['C4', 'E4', 'G4']);
         c.stop();
         async.flushTimers();
         c.dispose();

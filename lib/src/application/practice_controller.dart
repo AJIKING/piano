@@ -112,6 +112,8 @@ class PracticeController extends ChangeNotifier {
     while (_nextNote < _notes.length &&
         _notes[_nextNote].beat <= _elapsedBeats) {
       final note = _notes[_nextNote++];
+      // 余韻は発音時点のテンポで実時間に換算する。発音後に大きくテンポを変えると
+      // この note-off は古い実時間で予約済みのため多少ずれる(次の音から整合する)。
       _audio.playNote(
         note.pitch,
         sustain: Duration(
