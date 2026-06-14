@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/audio/audio_engine.dart';
+import '../../domain/score/note.dart';
 import '../theme/etude_theme.dart';
 import '../widgets/piano_keyboard.dart';
 
@@ -24,7 +25,8 @@ class _FreeScreenState extends State<FreeScreen> {
       _audioReady = true;
     }
     widget.audioEngine.playNote(pitch);
-    setState(() => _lastNote = pitch.replaceAll('#', '♯'));
+    // 「A3」等ではなく音階(ドレミ)で表示する。
+    setState(() => _lastNote = Note.solfege(pitch));
   }
 
   @override
@@ -50,7 +52,7 @@ class _FreeScreenState extends State<FreeScreen> {
                     ),
                   ),
                   const Text(
-                    'LAST NOTE',
+                    '音階',
                     style: TextStyle(
                       fontSize: 9,
                       letterSpacing: 1.4,

@@ -41,6 +41,9 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // 音源(SoundFont)のロードは時間がかかるので起動時に先読みしておく
+    // (初回の試聴・再生で音が詰まる/出ないのを防ぐ)。
+    _audio.init();
     _library = LibraryController(
       repository: widget.dependencies.scoreRepository,
       store: widget.dependencies.libraryStore,
@@ -108,11 +111,6 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     setState(() => _index = _kEditor);
   }
 
-  void _practiceCurrent() {
-    _persistEditor();
-    setState(() => _index = _kPractice);
-  }
-
   Widget _content() {
     switch (_index) {
       case _kPractice:
@@ -130,7 +128,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           key: ValueKey(_editor),
           controller: _editor,
           audioEngine: _audio,
-          onPractice: _practiceCurrent,
+          onSave: _persistEditor,
         );
       case _kFree:
         return FreeScreen(audioEngine: _audio);

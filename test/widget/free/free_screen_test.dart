@@ -5,20 +5,19 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../fixtures/recording_audio_engine.dart';
 
 void main() {
-  testWidgets('鍵盤タップで発音し、最後の音名を表示する', (tester) async {
+  testWidgets('鍵盤タップで発音し、最後の音を音階(ドレミ)で表示する', (tester) async {
     final audio = RecordingAudioEngine();
     await tester.pumpWidget(MaterialApp(home: FreeScreen(audioEngine: audio)));
 
-    // C 鍵は鍵盤上に音名ラベルを持つため、衝突しない D2 を使う。
     await tester.tap(find.byKey(const ValueKey('key-D2')));
     await tester.pump();
 
     expect(audio.playedPitches, ['D2']);
     expect(audio.initCount, 1);
-    expect(find.text('D2'), findsOneWidget);
+    expect(find.text('レ'), findsOneWidget); // D2 → レ(音階表示)
   });
 
-  testWidgets('黒鍵は ♯ 表記で表示される', (tester) async {
+  testWidgets('黒鍵は ♯ 付きの音階で表示される', (tester) async {
     final audio = RecordingAudioEngine();
     await tester.pumpWidget(MaterialApp(home: FreeScreen(audioEngine: audio)));
 
@@ -26,6 +25,6 @@ void main() {
     await tester.pump();
 
     expect(audio.playedPitches, ['C#2']);
-    expect(find.text('C♯2'), findsOneWidget);
+    expect(find.text('ド♯'), findsOneWidget); // C#2 → ド♯
   });
 }

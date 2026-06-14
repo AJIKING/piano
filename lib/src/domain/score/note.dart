@@ -78,6 +78,22 @@ class Note {
     return '$letter${withSharp ? '#' : ''}$octave';
   }
 
+  /// 音名 → 音階(ドレミ)表記。オクターブは付けない。`C4`→`ド`, `F#5`→`ファ♯`。
+  static const Map<String, String> _solfege = {
+    'C': 'ド',
+    'D': 'レ',
+    'E': 'ミ',
+    'F': 'ファ',
+    'G': 'ソ',
+    'A': 'ラ',
+    'B': 'シ',
+  };
+  static String solfege(String pitch) {
+    final m = _pitchPattern.firstMatch(pitch);
+    if (m == null) return pitch;
+    return '${_solfege[m.group(1)]!}${m.group(2) == '#' ? '♯' : ''}';
+  }
+
   /// C からの半音数(C=0, C#=1, …, B=11)。
   static const Map<String, int> _letterSemitone = {
     'C': 0,

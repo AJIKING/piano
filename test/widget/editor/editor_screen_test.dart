@@ -10,12 +10,12 @@ void main() {
   Widget wrap(
     EditorController controller, {
     RecordingAudioEngine? audio,
-    VoidCallback? onPractice,
+    VoidCallback? onSave,
   }) => MaterialApp(
     home: EditorScreen(
       controller: controller,
       audioEngine: audio ?? RecordingAudioEngine(),
-      onPractice: onPractice,
+      onSave: onSave,
     ),
   );
 
@@ -40,16 +40,16 @@ void main() {
     expect(find.text('音符数: 1'), findsOneWidget);
   });
 
-  testWidgets('練習するで onPractice が呼ばれる', (tester) async {
-    var practiced = false;
+  testWidgets('保存するで onSave が呼ばれる', (tester) async {
+    var saved = false;
     await tester.pumpWidget(
       wrap(
         EditorController(piece: twoBeatMelody()),
-        onPractice: () => practiced = true,
+        onSave: () => saved = true,
       ),
     );
 
-    await tester.tap(find.text('練習する'));
-    expect(practiced, isTrue);
+    await tester.tap(find.text('保存する'));
+    expect(saved, isTrue);
   });
 }

@@ -1,4 +1,6 @@
 import 'package:etude/src/application/practice_controller.dart';
+import 'package:etude/src/domain/score/note.dart';
+import 'package:etude/src/domain/score/piece.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,7 +29,7 @@ void main() {
         // total=2.3 秒を超えると自動停止し先頭へ戻る。
         async.elapse(const Duration(milliseconds: 1400));
         expect(c.isPlaying, isFalse);
-        expect(c.playhead, Duration.zero);
+        expect(c.playheadBeats, 0);
         expect(audio.stopAllCount, greaterThanOrEqualTo(1));
 
         c.dispose();
@@ -103,6 +105,38 @@ void main() {
         // 再生中にスライダーを動かしても、再生ヘッドは play 時のテンポ換算のまま。
         c.setBpm(120);
         expect(c.playheadBeats, closeTo(1.0, 0.05));
+        c.stop();
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
+    test('再生中に BPM を上げると以後の進みが速くなる', () {
+      fakeAsync((async) {
+        // 途中で止まらないよう長めの曲。
+        final piece = Piece(
+          id: 'p',
+          title: 't',
+          composer: 'c',
+          notes: const [
+            Note(pitch: 'C4', beat: 0, duration: 1),
+            Note(pitch: 'C5', beat: 8, duration: 1),
+          ],
+        );
+        final c = PracticeController(
+          piece: piece,
+          audioEngine: RecordingAudioEngine(),
+          bpm: 60,
+        );
+
+        c.play();
+        async.elapse(const Duration(milliseconds: 500)); // 60bpm → ~0.5 拍
+        c.setBpm(120);
+        async.elapse(const Duration(milliseconds: 500)); // 120bpm → +~1.0 拍
+
+        // 一定 60bpm なら 1.0 拍だが、途中で倍速にしたので ~1.5 拍進む。
+        expect(c.playheadBeats, closeTo(1.5, 0.15));
+
         c.stop();
         async.flushTimers();
         c.dispose();

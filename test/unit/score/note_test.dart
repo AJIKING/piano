@@ -109,6 +109,19 @@ void main() {
     });
   });
 
+  group('Note.solfege（音名 → ドレミ）', () {
+    test('オクターブを除いた音階で返す', () {
+      expect(Note.solfege('C4'), 'ド');
+      expect(Note.solfege('A3'), 'ラ');
+      expect(Note.solfege('G5'), 'ソ');
+    });
+
+    test('♯ は ♯ 付きで返す', () {
+      expect(Note.solfege('F#4'), 'ファ♯');
+      expect(Note.solfege('C#2'), 'ド♯');
+    });
+  });
+
   group('Note JSON 往復・同値', () {
     test('toJson/fromJson で復元できる', () {
       const note = Note(pitch: 'F#5', beat: 2.5, duration: 0.5);

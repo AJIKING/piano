@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../domain/audio/audio_engine.dart';
+import '../domain/score/note.dart';
 import '../domain/score/piece.dart';
-import '../domain/score/playback_schedule.dart';
 
-/// 練習画面の再生状態。`PlaybackSchedule`(pure Dart)を `Timer` で駆動し、
-/// `AudioEngine` 境界へ発音を委譲する。実時間に依存せず、テストは `fake_async`
+/// 練習画面の再生状態。旋律を**拍ベース**で進め、`AudioEngine` 境界へ発音を委譲する。
+///
+/// 拍の進み(`_elapsedBeats`)を毎フレーム `bpm` に応じて加算するため、**再生中に
+/// テンポを変えると即座に再生速度が変わる**。実時間に依存せず、テストは `fake_async`
 /// で `Timer` を進めて検証する。
 class PracticeController extends ChangeNotifier {
   PracticeController({
@@ -24,6 +26,12 @@ class PracticeController extends ChangeNotifier {
   static const double minBpm = 40;
   static const double maxBpm = 160;
 
+  /// 拍子の強拍周期(3/4 拍子)。
+  static const int beatsPerMeasure = 3;
+
+  /// 末尾に付ける余韻(拍)。
+  static const double tailBeats = 0.3;
+
   /// 描画フレーム相当の刻み(約 60fps)。
   static const Duration tickInterval = Duration(milliseconds: 16);
 
@@ -35,43 +43,37 @@ class PracticeController extends ChangeNotifier {
   double _bpm;
   bool _metronomeOn = false;
   bool _isPlaying = false;
-  Duration _playhead = Duration.zero;
   int? _litNoteIndex;
 
   Timer? _timer;
-  PlaybackSchedule? _schedule;
-  Duration _elapsed = Duration.zero;
-  int _nextEvent = 0;
-  int _nextTick = 0;
-  double _playSecondsPerBeat = 1;
+  List<Note> _notes = const [];
+  double _elapsedBeats = 0;
+  double _contentEndBeats = 0;
+  double _totalBeats = 0;
+  int _nextNote = 0;
+  int _nextBeat = 0;
 
   double get bpm => _bpm;
   bool get metronomeOn => _metronomeOn;
   bool get isPlaying => _isPlaying;
 
-  /// 曲頭からの再生位置。
-  Duration get playhead => _playhead;
-
   /// 曲頭からの再生位置(拍)。譜面の再生ヘッド描画に使う。
-  /// テンポを再生中に変えても、再生に使っているテンポで換算する(譜面とズレない)。
-  double get playheadBeats => _playSecondsPerBeat <= 0
-      ? 0
-      : _elapsed.inMicroseconds / 1e6 / _playSecondsPerBeat;
+  double get playheadBeats => _elapsedBeats;
 
-  /// いま鳴っている音符のインデックス(無ければ null)。譜面ハイライト用。
+  /// いま鳴っている音符のインデックス([piece] の正準順)。譜面ハイライト用。
   int? get litNoteIndex => _litNoteIndex;
 
   /// 先頭から再生を開始する。空の旋律では何もしない。
   void play() {
     if (_isPlaying) return;
-    final schedule = PlaybackSchedule.fromNotes(piece.notes, bpm: _bpm);
-    if (schedule.events.isEmpty) return;
-    _schedule = schedule;
-    _playSecondsPerBeat = PlaybackSchedule.secondsPerBeat(_bpm);
+    _notes = piece.sortedNotes;
+    if (_notes.isEmpty) return;
+    _contentEndBeats = Piece.contentEndOf(_notes);
+    _totalBeats = _contentEndBeats + tailBeats;
+    _elapsedBeats = 0;
+    _nextNote = 0;
+    _nextBeat = 0;
     _audio.init();
-    _elapsed = Duration.zero;
-    _nextEvent = 0;
-    _nextTick = 0;
     _isPlaying = true;
     _timer = Timer.periodic(tickInterval, (_) => _onTick());
     notifyListeners();
@@ -83,14 +85,14 @@ class PracticeController extends ChangeNotifier {
     _timer = null;
     if (_isPlaying) _audio.stopAll();
     _isPlaying = false;
-    _playhead = Duration.zero;
+    _elapsedBeats = 0;
     _litNoteIndex = null;
     notifyListeners();
   }
 
   void toggle() => _isPlaying ? stop() : play();
 
-  /// テンポを変える(再生中は次の `play()` から反映)。
+  /// テンポを変える。**再生中なら即座に再生速度へ反映される**。
   void setBpm(double value) {
     _bpm = value.clamp(minBpm, maxBpm);
     notifyListeners();
@@ -102,30 +104,36 @@ class PracticeController extends ChangeNotifier {
   }
 
   void _onTick() {
-    final schedule = _schedule!;
-    _elapsed += tickInterval;
+    final seconds = tickInterval.inMicroseconds / 1e6;
+    // この瞬間のテンポで拍を進める(再生中のテンポ変更が即反映される)。
+    _elapsedBeats += seconds * (_bpm / 60);
+    final secondsPerBeat = 60 / _bpm;
 
-    while (_nextEvent < schedule.events.length &&
-        schedule.events[_nextEvent].time <= _elapsed) {
-      final event = schedule.events[_nextEvent++];
-      _audio.playNote(event.pitch, sustain: event.duration);
-      _litNoteIndex = event.noteIndex;
+    while (_nextNote < _notes.length &&
+        _notes[_nextNote].beat <= _elapsedBeats) {
+      final note = _notes[_nextNote++];
+      _audio.playNote(
+        note.pitch,
+        sustain: Duration(
+          microseconds: (note.duration * secondsPerBeat * 1e6).round(),
+        ),
+      );
+      _litNoteIndex = _nextNote - 1;
     }
 
     if (_metronomeOn) {
-      while (_nextTick < schedule.metronome.length &&
-          schedule.metronome[_nextTick].time <= _elapsed) {
-        final tick = schedule.metronome[_nextTick++];
+      final lastBeat = _contentEndBeats.ceil();
+      while (_nextBeat < lastBeat && _nextBeat <= _elapsedBeats) {
         // クリックは AudioEngine の発音で代用(強拍/弱拍で音高を変える)。
         _audio.playNote(
-          tick.isDownbeat ? 'C3' : 'G2',
+          _nextBeat % beatsPerMeasure == 0 ? 'C3' : 'G2',
           sustain: const Duration(milliseconds: 50),
         );
+        _nextBeat++;
       }
     }
 
-    _playhead = _elapsed;
-    if (_elapsed >= schedule.total) {
+    if (_elapsedBeats >= _totalBeats) {
       stop();
       onCompleted?.call();
       return;

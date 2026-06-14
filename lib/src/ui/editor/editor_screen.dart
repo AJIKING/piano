@@ -11,20 +11,20 @@ import '../widgets/score_view.dart';
 /// 音価/♯ を編集する。
 ///
 /// 編集状態 [controller] はシェルが所有する(タブを切り替えても保持される)。
-/// この widget は描画と試聴・練習への切替だけを担う。
+/// この widget は描画・試聴・保存だけを担う。
 class EditorScreen extends StatefulWidget {
   const EditorScreen({
     super.key,
     required this.controller,
     required this.audioEngine,
-    this.onPractice,
+    this.onSave,
   });
 
   final EditorController controller;
   final AudioEngine audioEngine;
 
-  /// 「練習する」で練習タブへ切り替える(シェルが現在の編集内容で練習を開く)。
-  final VoidCallback? onPractice;
+  /// 「保存する」で編集内容を永続化する(シェルが LibraryStore へ保存)。
+  final VoidCallback? onSave;
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
@@ -76,9 +76,11 @@ class _EditorScreenState extends State<EditorScreen> {
     }
   }
 
-  void _practice() {
-    _preview.stop();
-    widget.onPractice?.call();
+  void _save() {
+    widget.onSave?.call();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('保存しました'), duration: Duration(seconds: 1)),
+    );
   }
 
   @override
@@ -122,7 +124,7 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
-  /// 曲名(左・可変幅)と 試聴 / 練習する ボタンを 1 行に並べる。
+  /// 曲名(左・可変幅)と 試聴 / 保存する ボタンを 1 行に並べる。
   Widget _titleBar() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 8, 0),
@@ -159,7 +161,11 @@ class _EditorScreenState extends State<EditorScreen> {
             ),
           ),
           const SizedBox(width: 4),
-          FilledButton(onPressed: _practice, child: const Text('練習する')),
+          FilledButton.icon(
+            onPressed: _save,
+            icon: const Icon(Icons.save_outlined, size: 18),
+            label: const Text('保存する'),
+          ),
         ],
       ),
     );
