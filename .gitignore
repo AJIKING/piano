@@ -47,3 +47,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# SoundFont(音源バイナリ)は大きいので追跡しない。配置方法は assets/audio/README.md
+assets/audio/*.sf2
