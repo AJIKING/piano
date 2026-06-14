@@ -12,6 +12,15 @@
 
 `pubspec.yaml` は `assets/audio/` をディレクトリ宣言しているので、`piano.sf2` を置くだけで自動的に同梱される（pubspec の編集は不要）。
 
+## リポジトリ管理 / CI(codemagic)
+
+`.sf2` は大きい（数百MB になり得る）ため **git では追跡しない**（`.gitignore` で `assets/audio/*.sf2` を除外）。GitHub は 100MB 超の push を拒否するのも理由。
+
+- **ローカル**: 上記のとおり手元に置けば `flutter run` で鳴る。
+- **CI(codemagic / TestFlight)**: `piano.sf2` を **GitHub Release `assets-v1`** にアップロードしておき、`codemagic.yaml` のステップ「音源(SoundFont)をダウンロード」がビルド時に
+  `https://github.com/AJIKING/piano/releases/download/assets-v1/piano.sf2`
+  から取得して同梱する。音源を差し替えたら Release のアセットを更新する（タグを変える場合は codemagic.yaml の URL も合わせる）。
+
 ## 仕組み
 - 読み込みと発音は `lib/src/data/midi_pro_audio_engine.dart`（`AudioEngine` 境界の本番実装）が `flutter_midi_pro` 経由で行う。
 - `Note.midiOf(pitch)` で音名 → MIDI ノート番号に変換して `playNote`、余韻後に `stopNote`。

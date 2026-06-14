@@ -32,6 +32,15 @@ workflows:
     scripts:
       - name: Flutter pub get
         script: flutter pub get
+      - name: 音源(SoundFont)をダウンロード
+        # ピアノ音色の .sf2 は大きく(数百MB)リポジトリに含めないため、GitHub Release
+        # から取得して同梱する(assets/audio/ はディレクトリ宣言済みなので置けば同梱される)。
+        # 音源を差し替えたら Release(assets-v1)のアセットを更新する。-f で取得失敗時は
+        # ビルドを止める(HTML エラーを誤って同梱しない)。
+        script: |
+          curl -fSL -o assets/audio/piano.sf2 \
+            "https://github.com/AJIKING/piano/releases/download/assets-v1/piano.sf2"
+          ls -la assets/audio/piano.sf2
       - name: 解析とテスト(golden はローカル同様に除外。基準 platform が Linux のため)
         script: |
           flutter analyze
