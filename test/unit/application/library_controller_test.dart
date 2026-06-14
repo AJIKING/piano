@@ -1,0 +1,115 @@
+import 'package:etude/src/application/library_controller.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../../fixtures/fake_clock.dart';
+import '../../fixtures/fixture_pieces.dart';
+import '../../fixtures/in_memory_library_store.dart';
+
+void main() {
+  LibraryController build({InMemoryLibraryStore? store, DateTime? now}) =>
+      LibraryController(
+        repository: FixtureScoreRepository(),
+        store: store ?? InMemoryLibraryStore(),
+        clock: FakeClock(now ?? DateTime(2026, 1, 1, 9)),
+      );
+
+  group('LibraryController', () {
+    test('初期化時に収録曲で seed され、featured は一覧から除かれる', () {
+      final controller = build();
+      expect(controller.featured.id, 'fixture-two-beat');
+      expect(controller.pieces.map((p) => p.id), ['fixture-a', 'fixture-b']);
+    });
+
+    test('restore は保存済みコレクションで置き換える', () async {
+      final store = InMemoryLibraryStore([emptyUserPiece()]);
+      final controller = build(store: store);
+
+      await controller.restore();
+
+      // featured が無い保存データには featured を補い、一覧からは除く。
+      expect(controller.featured.id, 'fixture-two-beat');
+      expect(controller.pieces.map((p) => p.id), ['fixture-empty']);
+    });
+
+    test('restore は保存が空なら seed を保つ', () async {
+      final controller = build();
+      await controller.restore();
+      expect(controller.pieces, hasLength(2));
+    });
+
+    test('createPiece は自作曲を追加し、永続化し、通知する', () async {
+      final store = InMemoryLibraryStore();
+      final controller = build(store: store);
+      var notified = 0;
+      controller.addListener(() => notified++);
+
+      final created = await controller.createPiece();
+
+      expect(created.isUserCreated, isTrue);
+      expect(controller.pieces.last.id, created.id);
+      expect(controller.pieces, hasLength(3));
+      expect(store.saveCount, 1);
+      expect(store.saved!.last.id, created.id);
+      expect(notified, greaterThanOrEqualTo(1));
+    });
+
+    test('createPiece の id は一意', () async {
+      final controller = build();
+      final a = await controller.createPiece();
+      final b = await controller.createPiece();
+      expect(a.id, isNot(b.id));
+    });
+
+    test('savePiece は同じ id を置き換え、永続化する', () async {
+      final store = InMemoryLibraryStore();
+      final controller = build(store: store);
+
+      await controller.savePiece(
+        twoBeatMelody().copyWith(id: 'fixture-a', title: '編集済み'),
+      );
+
+      expect(
+        controller.pieces.firstWhere((p) => p.id == 'fixture-a').title,
+        '編集済み',
+      );
+      expect(store.saved!.any((p) => p.title == '編集済み'), isTrue);
+    });
+
+    test('savePiece は未知の id を追加する', () async {
+      final controller = build();
+      await controller.savePiece(emptyUserPiece());
+      expect(controller.pieces.any((p) => p.id == 'fixture-empty'), isTrue);
+    });
+
+    test('createPiece は復元後も既存 user id と衝突しない', () async {
+      final existing = emptyUserPiece().copyWith(id: 'user-1', title: '既存');
+      final controller = build(store: InMemoryLibraryStore([existing]));
+      await controller.restore();
+
+      final created = await controller.createPiece();
+
+      expect(created.id, isNot('user-1'));
+      // 既存の user-1 が上書きされていない。
+      expect(controller.pieces.where((p) => p.id == 'user-1'), hasLength(1));
+    });
+
+    test('recordPractice は習得度を上げ、最終練習日時を記録し、永続化する', () async {
+      final store = InMemoryLibraryStore();
+      final controller = build(store: store, now: DateTime(2026, 1, 1, 9));
+
+      await controller.recordPractice('fixture-two-beat'); // featured
+
+      expect(controller.featured.masteryPercent, 12); // 0 → +12
+      expect(controller.featured.lastPracticedAt, DateTime(2026, 1, 1, 9));
+      expect(store.saveCount, 1);
+    });
+
+    test('lastPracticedLabel は未練習で —、練習当日で 今日', () async {
+      final controller = build(now: DateTime(2026, 1, 1, 9));
+      expect(controller.lastPracticedLabel(controller.featured), '—');
+
+      await controller.recordPractice('fixture-two-beat');
+      expect(controller.lastPracticedLabel(controller.featured), '今日');
+    });
+  });
+}

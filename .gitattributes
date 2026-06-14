@@ -1,0 +1,16 @@
+# 改行コードを正規化する。リポジトリ内は常に LF で保存し、チェックアウトも LF。
+# CI(ubuntu)・golden 基準 platform(Linux)・dart format と一貫させ、
+# Windows 開発機での CRLF 混入を防ぐ。
+* text=auto eol=lf
+
+# バイナリ(改行変換しない)。
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.jar binary
+*.keystore binary
+*.p12 binary
