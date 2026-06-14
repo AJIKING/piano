@@ -38,6 +38,20 @@ void main() {
       expect(piece.notes.first.beat, 2);
     });
 
+    test('sortedNotes は同 beat を音高順に整列(安定ソートに依存しない全順序)', () {
+      final piece = Piece(
+        id: 'p',
+        title: 't',
+        composer: 'c',
+        notes: const [
+          Note(pitch: 'G4', beat: 0, duration: 1),
+          Note(pitch: 'C4', beat: 0, duration: 1),
+          Note(pitch: 'E4', beat: 0, duration: 1),
+        ],
+      );
+      expect(piece.sortedNotes.map((n) => n.pitch), ['C4', 'E4', 'G4']);
+    });
+
     test('copyWith は指定フィールドだけ差し替える', () {
       final updated = twoBeatMelody().copyWith(masteryPercent: 50);
       expect(updated.masteryPercent, 50);

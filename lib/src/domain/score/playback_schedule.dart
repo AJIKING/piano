@@ -64,8 +64,10 @@ class PlaybackSchedule {
     double tailBeats = 0.3,
     int beatsPerMeasure = 3,
   }) {
-    final sorted = List<Note>.of(notes)
-      ..sort((a, b) => a.beat.compareTo(b.beat));
+    assert(bpm > 0, 'bpm は正の値である必要があります: $bpm');
+    // 譜面ハイライトの noteIndex を painter の並び(Piece.sortedNotes)と一致させるため、
+    // 同じ正準比較子で整列する。
+    final sorted = List<Note>.of(notes)..sort(Piece.compareNotes);
 
     final events = <PlaybackEvent>[
       for (final (i, n) in sorted.indexed)

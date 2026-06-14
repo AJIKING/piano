@@ -41,9 +41,21 @@ class Piece {
   /// 旋律の終端拍。
   double get contentEnd => contentEndOf(notes);
 
-  /// `beat` 昇順に整列した旋律のコピー。
-  List<Note> get sortedNotes =>
-      List<Note>.of(notes)..sort((a, b) => a.beat.compareTo(b.beat));
+  /// 音符の正準な**全順序**(beat → 音高(MIDI) → 音価)。
+  ///
+  /// `List.sort` は安定ソートではないため、`beat` だけで比較すると同 beat の音符
+  /// (和音)の相対順序がソートのたびに変わりうる。譜面描画・タップ判定・再生で
+  /// 並びがズレないよう、どこでソートしても同じ並びになる全順序を 1 つに定める。
+  static int compareNotes(Note a, Note b) {
+    final byBeat = a.beat.compareTo(b.beat);
+    if (byBeat != 0) return byBeat;
+    final byPitch = Note.midiOf(a.pitch).compareTo(Note.midiOf(b.pitch));
+    if (byPitch != 0) return byPitch;
+    return a.duration.compareTo(b.duration);
+  }
+
+  /// 正準順に整列した旋律のコピー。
+  List<Note> get sortedNotes => List<Note>.of(notes)..sort(compareNotes);
 
   Piece copyWith({
     String? id,

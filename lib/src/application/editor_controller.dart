@@ -10,7 +10,7 @@ class EditorController extends ChangeNotifier {
     : _piece = piece,
       _title = piece.title,
       _notes = List<Note>.of(piece.notes) {
-    _notes.sort((a, b) => a.beat.compareTo(b.beat));
+    _notes.sort(Piece.compareNotes);
     _insertBeat = contentEnd;
   }
 
@@ -43,8 +43,10 @@ class EditorController extends ChangeNotifier {
   Piece get currentPiece =>
       _piece.copyWith(title: _title, notes: List<Note>.of(_notes));
 
+  /// 正準順に整列し直し、[note] を選択状態として再特定する
+  /// (選択音符を書き換えた後でもインデックスが古くならないようにする)。
   void _sortAndSelect(Note note) {
-    _notes.sort((a, b) => a.beat.compareTo(b.beat));
+    _notes.sort(Piece.compareNotes);
     _selectedIndex = _notes.indexOf(note);
   }
 
@@ -58,7 +60,12 @@ class EditorController extends ChangeNotifier {
   void setDuration(double duration) {
     _currentDuration = duration;
     final i = _selectedIndex;
-    if (i != null) _notes[i] = _notes[i].copyWith(duration: duration);
+    if (i != null) {
+      final updated = _notes[i].copyWith(duration: duration);
+      _notes[i] = updated;
+      // 音価は順序に影響しうる(同 beat・同 pitch の比較で音価がタイブレーク)。
+      _sortAndSelect(updated);
+    }
     notifyListeners();
   }
 
@@ -68,9 +75,12 @@ class EditorController extends ChangeNotifier {
     final i = _selectedIndex;
     if (i != null && _notes[i].isSharpable) {
       final hasSharp = _notes[i].pitch.contains('#');
-      _notes[i] = _notes[i].copyWith(
+      final updated = _notes[i].copyWith(
         pitch: Note.withAccidental(_notes[i].pitch, sharp: !hasSharp),
       );
+      _notes[i] = updated;
+      // 音高変更は同 beat 内の並びを変えるため整列し直して選択を維持する。
+      _sortAndSelect(updated);
     }
     notifyListeners();
   }

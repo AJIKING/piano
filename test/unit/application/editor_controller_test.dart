@@ -94,6 +94,37 @@ void main() {
     });
   });
 
+  group('和音(同 beat の音符)', () {
+    test('同 beat は音高順に安定整列する', () {
+      final c = fromEmpty();
+      c.addNoteAtStep(beat: 0, step: 2); // G4
+      c.addNoteAtStep(beat: 0, step: 0); // E4
+      c.addNoteAtStep(beat: 0, step: -2); // C4
+      expect(c.notes.map((n) => n.pitch), ['C4', 'E4', 'G4']);
+    });
+
+    test('選択音符の音価変更後も選択が同じ音符を指し続ける', () {
+      final c = fromEmpty();
+      c.addNoteAtStep(beat: 0, step: 2); // G4
+      c.addNoteAtStep(beat: 0, step: 0); // E4(選択。E4<G4 で index 0)
+      expect(c.notes[c.selectedIndex!].pitch, 'E4');
+
+      c.setDuration(2);
+      expect(c.notes[c.selectedIndex!].pitch, 'E4');
+      expect(c.notes[c.selectedIndex!].duration, 2);
+    });
+
+    test('選択音符の ♯ 付与後も選択が追従する', () {
+      final c = fromEmpty();
+      c.addNoteAtStep(beat: 0, step: 0); // E4
+      c.addNoteAtStep(beat: 0, step: -2); // C4(選択。C4<E4 で index 0)
+      expect(c.notes[c.selectedIndex!].pitch, 'C4');
+
+      c.toggleSharp(); // C4 → C#4(midi 61、E4 64 の手前のまま)
+      expect(c.notes[c.selectedIndex!].pitch, 'C#4');
+    });
+  });
+
   group('削除', () {
     test('選択中はその音符を削除し、選択を解除する', () {
       final c = fromTwoBeat();

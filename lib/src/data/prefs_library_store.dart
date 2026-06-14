@@ -24,16 +24,25 @@ class PrefsLibraryStore implements LibraryStore {
     final prefs = await _instance;
     final raw = prefs.getString(storageKey);
     if (raw == null) return null;
-    // 壊れた JSON・型不一致は例外にせず null(初回起動扱い)。アプリは必ず起動できる。
+    // 全体が壊れた JSON・形が違う場合は null(初回起動扱い)。アプリは必ず起動できる。
+    final Object? decoded;
     try {
-      final decoded = jsonDecode(raw);
-      final list = (decoded as Map)['pieces'] as List<Object?>;
-      return list
-          .map((e) => Piece.fromJson((e as Map).cast<String, Object?>()))
-          .toList();
+      decoded = jsonDecode(raw);
     } catch (_) {
       return null;
     }
+    if (decoded is! Map || decoded['pieces'] is! List) return null;
+
+    // 1 件壊れていても残りは活かす(部分破損で全データを失わない)。
+    final pieces = <Piece>[];
+    for (final entry in decoded['pieces'] as List) {
+      try {
+        pieces.add(Piece.fromJson((entry as Map).cast<String, Object?>()));
+      } catch (_) {
+        // 壊れた 1 件はスキップ。
+      }
+    }
+    return pieces;
   }
 
   @override
