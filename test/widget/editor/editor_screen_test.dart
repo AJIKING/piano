@@ -52,4 +52,35 @@ void main() {
     await tester.tap(find.text('保存する'));
     expect(saved, isTrue);
   });
+
+  testWidgets('戻る・末尾へボタンがあり、ユーザー曲では元に戻すは出ない', (tester) async {
+    await tester.pumpWidget(wrap(EditorController(piece: emptyUserPiece())));
+
+    expect(find.byTooltip('戻る'), findsOneWidget);
+    expect(find.byTooltip('進む'), findsOneWidget);
+    expect(find.text('末尾へ'), findsOneWidget);
+    // original 無し → 元に戻すは非表示。
+    expect(find.text('元に戻す'), findsNothing);
+  });
+
+  testWidgets('収録曲(original あり)では元に戻すが出る', (tester) async {
+    final original = twoBeatMelody();
+    await tester.pumpWidget(
+      wrap(EditorController(piece: original, original: original)),
+    );
+
+    expect(find.text('元に戻す'), findsOneWidget);
+  });
+
+  testWidgets('鍵盤で追加 → 戻るで音符数が減る', (tester) async {
+    await tester.pumpWidget(wrap(EditorController(piece: emptyUserPiece())));
+
+    await tester.tap(find.byKey(const ValueKey('key-C3')));
+    await tester.pump();
+    expect(find.text('音符数: 1'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('戻る'));
+    await tester.pump();
+    expect(find.text('音符数: 0'), findsOneWidget);
+  });
 }

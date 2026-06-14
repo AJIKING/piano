@@ -168,6 +168,75 @@ void main() {
     });
   });
 
+  group('戻る / 進む(undo / redo)', () {
+    test('追加 → undo で戻り、redo でやり直す', () {
+      final c = fromEmpty();
+      expect(c.canUndo, isFalse);
+      c.addNoteFromKeyboard('C4');
+      expect(c.noteCount, 1);
+      expect(c.canUndo, isTrue);
+
+      c.undo();
+      expect(c.noteCount, 0);
+      expect(c.canRedo, isTrue);
+
+      c.redo();
+      expect(c.noteCount, 1);
+    });
+
+    test('新しい編集をすると redo 履歴は消える', () {
+      final c = fromEmpty();
+      c.addNoteFromKeyboard('C4');
+      c.undo();
+      expect(c.canRedo, isTrue);
+      c.addNoteFromKeyboard('E4');
+      expect(c.canRedo, isFalse);
+    });
+
+    test('削除も undo で戻せる', () {
+      final c = fromTwoBeat();
+      c.deleteSelected(); // 末尾 E4 を削除
+      expect(c.notes.map((n) => n.pitch), ['C4']);
+      c.undo();
+      expect(c.notes.map((n) => n.pitch), ['C4', 'E4']);
+    });
+  });
+
+  group('末尾へ', () {
+    test('moveCaretToEnd でキャレットが末尾・選択解除', () {
+      final c = fromTwoBeat();
+      c.selectNote(0); // キャレットは C4 直後(1 拍)
+      c.moveCaretToEnd();
+      expect(c.selectedIndex, isNull);
+      expect(c.insertBeat, 2); // contentEnd
+    });
+  });
+
+  group('初期版へ戻す(resetToOriginal)', () {
+    test('収録曲は初期版に戻せる(旋律・曲名)', () {
+      final original = twoBeatMelody();
+      final c = EditorController(
+        piece: original.copyWith(title: '編集後'),
+        original: original,
+      );
+      expect(c.canReset, isTrue);
+      c.clearAll();
+      expect(c.noteCount, 0);
+
+      c.resetToOriginal();
+      expect(c.notes.map((n) => n.pitch), ['C4', 'E4']);
+      expect(c.title, original.title);
+      expect(c.canUndo, isTrue); // リセットも undo できる
+    });
+
+    test('original が無ければ canReset=false・何もしない', () {
+      final c = fromEmpty();
+      expect(c.canReset, isFalse);
+      c.resetToOriginal();
+      expect(c.noteCount, 0);
+    });
+  });
+
   test('変更で listener に通知する', () {
     final c = fromEmpty();
     var count = 0;

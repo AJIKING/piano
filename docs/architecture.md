@@ -77,7 +77,7 @@ lib/
     │   ├── dependencies.dart        # 差し替え境界の束(composition root が生成)
     │   ├── library_controller.dart  # 曲一覧・現在曲・新規作成(ChangeNotifier)
     │   ├── practice_controller.dart # 再生・テンポ・メトロノーム・playhead(ChangeNotifier)
-    │   └── editor_controller.dart   # 音符の追加/削除/選択・ツール状態・曲名(ChangeNotifier)
+    │   └── editor_controller.dart   # 音符の追加/削除/選択・ツール状態・曲名・戻る/進む・初期版リセット(ChangeNotifier)
     └── ui/
         ├── app_shell.dart          # NavigationRail シェル(4画面切替・編集状態と現在曲を所有)
         ├── theme/

@@ -37,6 +37,12 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
 
   AudioEngine get _audio => widget.dependencies.audioEngine;
 
+  /// 編集状態を生成する。収録曲なら初期版(`original`)を渡して「元に戻す」を可能にする。
+  EditorController _makeEditor(Piece piece) => EditorController(
+    piece: piece,
+    original: widget.dependencies.scoreRepository.original(piece.id),
+  );
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +55,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       store: widget.dependencies.libraryStore,
       clock: widget.dependencies.clock,
     );
-    _editor = EditorController(piece: _library.featured);
+    _editor = _makeEditor(_library.featured);
     _restore();
   }
 
@@ -62,7 +68,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         _editor.currentPiece.id == _library.featured.id) {
       setState(() {
         _editor.dispose();
-        _editor = EditorController(piece: _library.featured);
+        _editor = _makeEditor(_library.featured);
       });
     }
   }
@@ -92,7 +98,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   void _loadPiece(Piece piece) {
     _persistEditor();
     _editor.dispose();
-    _editor = EditorController(piece: piece);
+    _editor = _makeEditor(piece);
   }
 
   void _select(int index) {

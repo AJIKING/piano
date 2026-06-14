@@ -33,4 +33,12 @@ class FixtureScoreRepository implements ScoreRepository {
     twoBeatMelody().copyWith(id: 'fixture-a', title: '曲 A'),
     twoBeatMelody().copyWith(id: 'fixture-b', title: '曲 B'),
   ];
+
+  @override
+  Piece? original(String id) {
+    for (final piece in [featured(), ...samplePieces()]) {
+      if (piece.id == id) return piece;
+    }
+    return null;
+  }
 }

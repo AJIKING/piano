@@ -11,4 +11,12 @@ class BundledScoreRepository implements ScoreRepository {
 
   @override
   List<Piece> samplePieces() => buildSamplePieces();
+
+  @override
+  Piece? original(String id) {
+    for (final piece in [featured(), ...samplePieces()]) {
+      if (piece.id == id) return piece;
+    }
+    return null;
+  }
 }

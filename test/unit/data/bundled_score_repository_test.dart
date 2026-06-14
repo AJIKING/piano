@@ -19,6 +19,12 @@ void main() {
     expect(ids.toSet().length, ids.length);
   });
 
+  test('original は id で初期版を返し、未知 id は null', () {
+    expect(repo.original(repo.featured().id)?.id, repo.featured().id);
+    expect(repo.original(repo.samplePieces().first.id), isNotNull);
+    expect(repo.original('user-999'), isNull);
+  });
+
   test('stars は 0–5', () {
     for (final p in allPieces()) {
       expect(p.stars, inInclusiveRange(0, 5), reason: p.id);

@@ -8,4 +8,7 @@ abstract interface class ScoreRepository {
 
   /// 収録曲のコレクション(マイ楽譜の初期一覧。featured は含めない)。
   List<Piece> samplePieces();
+
+  /// 収録曲の初期版を id で返す(編集前へ戻す用)。該当しなければ null。
+  Piece? original(String id);
 }

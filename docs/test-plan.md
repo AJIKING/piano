@@ -23,7 +23,7 @@
 | 譜面ジオメトリ(`ScoreGeometry`) | 拍 → X 座標、音高 → Y 座標、X/Y → スナップした拍・音高(エディタのタップ追加) |
 | 再生(`PracticeController`) | 拍ベースで発音時刻を進める / 末尾+余韻で停止 / 再生中のテンポ変更が即反映 / 和音(同 beat)を全て発音(すべて fake_async で実時間を使わない) |
 | メトロノーム(`PracticeController`) | 1 拍ごとのクリック / 拍頭の強拍判定(3 拍子) |
-| 楽譜編集(`EditorController`) | 音符追加で beat 昇順に整列 / 選択音符の音価・♯ 変更 / 削除・全消去 / キャレット前進 / ♯ は黒鍵を持つ音名のみ / step→音名(`Note.pitchForStep`) |
+| 楽譜編集(`EditorController`) | 音符追加で beat 昇順に整列 / 選択音符の音価・♯ 変更 / 削除・全消去 / キャレット前進・末尾へ / 戻る・進む(undo/redo)/ 初期版へ戻す(収録曲のみ)/ ♯ は黒鍵を持つ音名のみ / step→音名(`Note.pitchForStep`) |
 | 習得度(`Mastery`) | 練習完了で +practiceStep / 100 で頭打ち |
 | 最終練習の相対表示(`relativePracticeLabel`) | 今日 / 昨日 / N 日前 / 未練習(—)を fake clock で検証(時刻差は無視) |
 | 収録曲データ検証 | `pitch` が妥当な音名 / `duration` が許容音価 / `beat` 非負・整列可能 / `id` 一意 / `stars` 0–5(全収録曲に対する contract test) |

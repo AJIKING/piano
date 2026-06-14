@@ -90,7 +90,6 @@ class _PieceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stars = '★' * piece.stars + '☆' * (5 - piece.stars);
     return ListTile(
       onTap: onOpen,
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -119,19 +118,10 @@ class _PieceRow extends StatelessWidget {
         piece.composer,
         style: const TextStyle(fontSize: 11, color: EtudeColors.ivory3),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            stars,
-            style: const TextStyle(color: EtudeColors.brass, fontSize: 10),
-          ),
-          IconButton(
-            tooltip: '編集',
-            icon: const Icon(Icons.edit_outlined, size: 18),
-            onPressed: onEdit,
-          ),
-        ],
+      trailing: IconButton(
+        tooltip: '編集',
+        icon: const Icon(Icons.edit_outlined, size: 18),
+        onPressed: onEdit,
       ),
     );
   }

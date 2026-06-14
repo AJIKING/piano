@@ -20,10 +20,14 @@ class ScoreView extends StatelessWidget {
     this.onAddAt,
     this.onSelectNote,
     this.snap = 1,
+    this.scrollController,
   });
 
   final Piece piece;
   final ScoreGeometry geometry;
+
+  /// 横スクロールの制御(エディタの自動スクロール用)。
+  final ScrollController? scrollController;
 
   /// 再生中にハイライトする音符。
   final int? litNoteIndex;
@@ -91,6 +95,7 @@ class ScoreView extends StatelessWidget {
     return SizedBox(
       height: height,
       child: SingleChildScrollView(
+        controller: scrollController,
         scrollDirection: Axis.horizontal,
         child: paint,
       ),
@@ -209,22 +214,49 @@ class _ScorePainter extends CustomPainter {
       }
     }
 
-    final headColor = lit
-        ? _lit
-        : selected
+    final headColor = selected
         ? _selected
+        : lit
+        ? _lit
         : _ink;
+    final notePaint = Paint()
+      ..color = headColor
+      ..strokeWidth = 1.4;
+
+    // ♯ 記号(線で描画。フォントに依存しない)。
+    if (note.pitch.contains('#')) {
+      final sx = x - 15;
+      canvas.drawLine(Offset(sx - 2, y - 6), Offset(sx - 2, y + 5), notePaint);
+      canvas.drawLine(Offset(sx + 2, y - 7), Offset(sx + 2, y + 4), notePaint);
+      canvas.drawLine(Offset(sx - 4, y - 1), Offset(sx + 4, y - 3), notePaint);
+      canvas.drawLine(Offset(sx - 4, y + 3), Offset(sx + 4, y + 1), notePaint);
+    }
+
     final up = step < 4;
     final stemX = x + (up ? 5.6 : -5.6);
     final stemY = up ? y - 22 : y + 22;
-    canvas.drawLine(
-      Offset(stemX, y),
-      Offset(stemX, stemY),
-      Paint()
-        ..color = headColor
-        ..strokeWidth = 1.4,
-    );
+    canvas.drawLine(Offset(stemX, y), Offset(stemX, stemY), notePaint);
 
+    // 8 分音符(0.5 拍)の旗。
+    if (note.duration < 1) {
+      final flag = Path()
+        ..moveTo(stemX, stemY)
+        ..quadraticBezierTo(
+          stemX + 8,
+          stemY + (up ? 3 : -3),
+          stemX + 5,
+          stemY + (up ? 12 : -12),
+        );
+      canvas.drawPath(
+        flag,
+        Paint()
+          ..color = headColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.4,
+      );
+    }
+
+    // 符頭。2 分・付点2分(2 拍以上)は白抜き、それ未満は塗りつぶし。
     canvas.save();
     canvas.translate(x, y);
     canvas.rotate(-0.31); // 約 -18 度
@@ -234,13 +266,25 @@ class _ScorePainter extends CustomPainter {
       height: 9.2,
     );
     final headPaint = Paint()..color = headColor;
-    if (selected || (note.duration >= 2 && !lit)) {
+    if (note.duration >= 2) {
       headPaint
         ..style = PaintingStyle.stroke
-        ..strokeWidth = selected ? 1.8 : 1.6;
+        ..strokeWidth = 1.6;
     }
     canvas.drawOval(headRect, headPaint);
     canvas.restore();
+
+    // 選択中はリングで強調(符頭の塗り/白抜きは音価で決まるので別表示)。
+    if (selected) {
+      canvas.drawCircle(
+        Offset(x, y),
+        10,
+        Paint()
+          ..color = _selected
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6,
+      );
+    }
   }
 
   @override
