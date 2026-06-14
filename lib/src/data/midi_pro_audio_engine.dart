@@ -25,9 +25,13 @@ class MidiProAudioEngine implements AudioEngine {
   int? _sfId;
   Future<void>? _loading;
 
+  /// 鍵(MIDI key)ごとの保留中ノートオフ。連打時に前の音が切られないよう管理する。
+  final Map<int, Timer> _noteOff = {};
+
   @override
   Future<void> init() {
-    // 多重呼び出しでも 1 回だけロードする。
+    if (_sfId != null) return Future<void>.value();
+    // 多重呼び出しでも 1 回だけロードする。失敗時は再試行できるよう後で null に戻す。
     return _loading ??= _load();
   }
 
@@ -38,6 +42,8 @@ class MidiProAudioEngine implements AudioEngine {
       // .sf2 未配置などで失敗してもアプリは起動する(発音のみ無音)。
       _sfId = null;
     }
+    // 失敗時は次回 init() で読み直せるようにする(成功時はキャッシュ)。
+    if (_sfId == null) _loading = null;
   }
 
   @override
@@ -56,15 +62,22 @@ class MidiProAudioEngine implements AudioEngine {
     if (sfId == null) return;
 
     final key = Note.midiOf(pitch);
+    // 同じ鍵の保留中ノートオフをキャンセルしてから鳴らす(連打で切られないように)。
+    _noteOff.remove(key)?.cancel();
     await _midi.playNote(channel: 0, key: key, velocity: 96, sfId: sfId);
     // 余韻の長さだけ鳴らしてからノートオフ(MIDI はサスティン中鳴り続けるため)。
-    Future<void>.delayed(sustain, () {
+    _noteOff[key] = Timer(sustain, () {
+      _noteOff.remove(key);
       _midi.stopNote(channel: 0, key: key, sfId: sfId);
     });
   }
 
   @override
   void stopAll() {
+    for (final timer in _noteOff.values) {
+      timer.cancel();
+    }
+    _noteOff.clear();
     final sfId = _sfId;
     if (sfId != null) unawaited(_midi.stopAllNotes(sfId: sfId));
   }

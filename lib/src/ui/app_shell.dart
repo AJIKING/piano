@@ -24,7 +24,7 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   static const _kLibrary = 0;
   static const _kPractice = 1;
   static const _kEditor = 2;
@@ -39,17 +39,43 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _library = LibraryController(
       repository: widget.dependencies.scoreRepository,
       store: widget.dependencies.libraryStore,
       clock: widget.dependencies.clock,
     );
     _editor = EditorController(piece: _library.featured);
-    _library.restore();
+    _restore();
+  }
+
+  Future<void> _restore() async {
+    await _library.restore();
+    if (!mounted) return;
+    // 永続化済みの featured を初期編集対象へ反映(まだ何も操作していない時のみ。
+    // 編集/練習タブへ移っている場合はユーザー操作を尊重して触らない)。
+    if (_index == _kLibrary &&
+        _editor.currentPiece.id == _library.featured.id) {
+      setState(() {
+        _editor.dispose();
+        _editor = EditorController(piece: _library.featured);
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // バックグラウンド化/終了の手前で未保存の編集を永続化する。
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _persistEditor();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _editor.dispose();
     _library.dispose();
     super.dispose();
@@ -89,13 +115,18 @@ class _AppShellState extends State<AppShell> {
   Widget _content() {
     switch (_index) {
       case _kPractice:
+        // 再生対象と記録対象を同じ piece に固定する(完了時に参照がブレない)。
+        final piece = _editor.currentPiece;
         return PracticeScreen(
-          piece: _editor.currentPiece,
+          key: ValueKey('practice-${piece.id}'),
+          piece: piece,
           audioEngine: _audio,
-          onCompleted: () => _library.recordPractice(_editor.currentPiece.id),
+          onCompleted: () => _library.recordPractice(piece.id),
         );
       case _kEditor:
+        // controller が差し替わったら State を作り直す(古い曲名/試聴対象を残さない)。
         return EditorScreen(
+          key: ValueKey(_editor),
           controller: _editor,
           audioEngine: _audio,
           onPractice: _practiceCurrent,

@@ -1,4 +1,5 @@
 import 'package:etude/src/application/dependencies.dart';
+import 'package:etude/src/domain/score/note.dart';
 import 'package:etude/src/ui/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,8 +10,8 @@ import '../fixtures/in_memory_library_store.dart';
 import '../fixtures/recording_audio_engine.dart';
 
 void main() {
-  ({Widget app, InMemoryLibraryStore store}) build() {
-    final store = InMemoryLibraryStore();
+  ({Widget app, InMemoryLibraryStore store}) build([InMemoryLibraryStore? s]) {
+    final store = s ?? InMemoryLibraryStore();
     final deps = Dependencies(
       clock: FakeClock(DateTime(2026, 1, 1)),
       scoreRepository: FixtureScoreRepository(),
@@ -74,5 +75,46 @@ void main() {
     final saved = built.store.saved!;
     final featured = saved.firstWhere((p) => p.id == 'fixture-two-beat');
     expect(featured.notes, hasLength(3));
+  });
+
+  testWidgets('別の曲を編集タブで開くと曲名・音符数が切り替わる', (tester) async {
+    await tester.pumpWidget(build().app);
+    await tester.pumpAndSettle();
+
+    // featured(2 音符)を編集タブで開き、1 音追加して 3 音符に。
+    await tester.tap(find.text('編集'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('key-C3')));
+    await tester.pump();
+    expect(find.text('音符数: 3'), findsOneWidget);
+
+    // 楽譜タブへ戻り、曲 A(2 音符)の編集を開く。
+    await tester.tap(find.text('楽譜'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('編集').first); // 曲 A
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(TextField, '曲 A'), findsOneWidget);
+    expect(find.text('音符数: 2'), findsOneWidget);
+  });
+
+  testWidgets('再起動時、保存済み featured の編集が編集タブに反映される', (tester) async {
+    // 前回 featured を 3 音符に編集して保存した状態を再現。
+    final editedFeatured = twoBeatMelody().copyWith(
+      notes: const [
+        Note(pitch: 'C4', beat: 0, duration: 1),
+        Note(pitch: 'E4', beat: 1, duration: 1),
+        Note(pitch: 'G4', beat: 2, duration: 1),
+      ],
+    );
+    final store = InMemoryLibraryStore([editedFeatured]);
+
+    await tester.pumpWidget(build(store).app);
+    await tester.pumpAndSettle(); // restore 完了 → _editor を読み直す
+
+    await tester.tap(find.text('編集'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('音符数: 3'), findsOneWidget);
   });
 }

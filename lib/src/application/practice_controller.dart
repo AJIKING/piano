@@ -136,6 +136,8 @@ class PracticeController extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
+    // 再生中に破棄されたら鳴っている音も止める(notifyListeners は呼ばない)。
+    if (_isPlaying) _audio.stopAll();
     super.dispose();
   }
 }

@@ -27,6 +27,10 @@ class LibraryController extends ChangeNotifier {
   final String _featuredId;
   List<Piece> _pieces;
 
+  /// 永続化の直列化チェーン。複数の保存が並走して古い snapshot が後着し、
+  /// ディスク内容が巻き戻る(lost update)のを防ぐ。
+  Future<void> _writes = Future<void>.value();
+
   /// 「今練習中」の曲(コレクション内の featured)。
   Piece get featured => _pieces.firstWhere(
     (p) => p.id == _featuredId,
@@ -108,5 +112,13 @@ class LibraryController extends ChangeNotifier {
     await _persist();
   }
 
-  Future<void> _persist() => _store.save(_pieces);
+  /// 現在のコレクションを永続化する。呼び出し順を保って直列に書き込む
+  /// (各書き込みは呼び出し時点の snapshot を保存する)。
+  Future<void> _persist() {
+    final snapshot = _pieces;
+    _writes = _writes
+        .then((_) => _store.save(snapshot))
+        .catchError((Object _) {});
+    return _writes;
+  }
 }
