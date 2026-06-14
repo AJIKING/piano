@@ -58,6 +58,10 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<!-- iPad マルチタスク(Split View/Slide Over)を無効化する。これにより横向き
+	     限定が許可される(マルチタスク対応アプリは全 4 方向必須のため。エラー 90474)。 -->
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
