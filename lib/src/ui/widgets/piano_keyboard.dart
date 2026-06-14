@@ -69,16 +69,20 @@ class PianoKeyboard extends StatelessWidget {
           height: height,
           child: Stack(
             children: [
-              Row(
-                children: [
-                  for (final w in whites)
-                    _WhiteKey(
-                      pitch: w.pitch,
-                      width: whiteKeyWidth,
-                      label: w.letter == 'C' ? w.pitch : null,
-                      onPressed: () => onNotePressed(w.pitch),
-                    ),
-                ],
+              // Positioned.fill + stretch で白鍵を高さいっぱいに伸ばす。
+              Positioned.fill(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final w in whites)
+                      _WhiteKey(
+                        pitch: w.pitch,
+                        width: whiteKeyWidth,
+                        label: w.letter == 'C' ? w.pitch : null,
+                        onPressed: () => onNotePressed(w.pitch),
+                      ),
+                  ],
+                ),
               ),
               ...blackKeys,
             ],

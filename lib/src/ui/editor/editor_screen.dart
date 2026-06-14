@@ -84,9 +84,68 @@ class _EditorScreenState extends State<EditorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('楽譜エディタ'),
-        actions: [
+      body: ListenableBuilder(
+        listenable: _editor,
+        builder: (context, _) {
+          return Column(
+            children: [
+              _titleBar(),
+              _toolbar(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                child: ScoreView(
+                  piece: _editor.currentPiece,
+                  selectedIndex: _editor.selectedIndex,
+                  caretBeat: _editor.insertBeat,
+                  snap: _editor.currentDuration,
+                  height: 120,
+                  onAddAt: (beat, step) =>
+                      _editor.addNoteAtStep(beat: beat, step: step),
+                  onSelectNote: _editor.selectNote,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Divider(height: 1),
+              // 鍵盤は残り高さいっぱいに広げる。
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) => PianoKeyboard(
+                    onNotePressed: _onKeyboard,
+                    height: constraints.maxHeight,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// 曲名(左・可変幅)と 試聴 / 練習する ボタンを 1 行に並べる。
+  Widget _titleBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 8, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _titleField,
+              onChanged: _editor.setTitle,
+              maxLength: 40,
+              textInputAction: TextInputAction.done,
+              style: const TextStyle(
+                fontFamily: 'ShipporiMincho',
+                fontSize: 18,
+              ),
+              decoration: const InputDecoration(
+                isDense: true,
+                counterText: '',
+                hintText: '曲名',
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           ListenableBuilder(
             listenable: _preview,
             builder: (context, _) => TextButton.icon(
@@ -99,59 +158,9 @@ class _EditorScreenState extends State<EditorScreen> {
               label: Text(_preview.isPlaying ? '停止' : '試聴'),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilledButton(
-              onPressed: _practice,
-              child: const Text('練習する'),
-            ),
-          ),
+          const SizedBox(width: 4),
+          FilledButton(onPressed: _practice, child: const Text('練習する')),
         ],
-      ),
-      body: ListenableBuilder(
-        listenable: _editor,
-        builder: (context, _) {
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: TextField(
-                  controller: _titleField,
-                  onChanged: _editor.setTitle,
-                  maxLength: 40,
-                  style: const TextStyle(
-                    fontFamily: 'ShipporiMincho',
-                    fontSize: 20,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: '曲名',
-                    counterText: '',
-                  ),
-                ),
-              ),
-              _toolbar(),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: ScoreView(
-                  piece: _editor.currentPiece,
-                  selectedIndex: _editor.selectedIndex,
-                  caretBeat: _editor.insertBeat,
-                  snap: _editor.currentDuration,
-                  onAddAt: (beat, step) =>
-                      _editor.addNoteAtStep(beat: beat, step: step),
-                  onSelectNote: _editor.selectNote,
-                ),
-              ),
-              const Divider(height: 1),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: PianoKeyboard(onNotePressed: _onKeyboard, height: 150),
-                ),
-              ),
-            ],
-          );
-        },
       ),
     );
   }

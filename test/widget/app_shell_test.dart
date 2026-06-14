@@ -31,6 +31,21 @@ void main() {
     expect(find.text('ライブラリ'), findsOneWidget);
   });
 
+  testWidgets('レールは開閉できる', (tester) async {
+    await tester.pumpWidget(build().app);
+    await tester.pumpAndSettle();
+    expect(find.text('練習'), findsOneWidget); // 開いている=ラベル表示
+
+    await tester.tap(find.byIcon(Icons.menu_open)); // 閉じる
+    await tester.pumpAndSettle();
+    expect(find.text('練習'), findsNothing); // ラベルが消える
+    expect(find.byIcon(Icons.menu), findsOneWidget); // 開くボタン
+
+    await tester.tap(find.byIcon(Icons.menu)); // 開く
+    await tester.pumpAndSettle();
+    expect(find.text('練習'), findsOneWidget);
+  });
+
   testWidgets('レールで演奏タブへ切り替えられる', (tester) async {
     await tester.pumpWidget(build().app);
     await tester.pumpAndSettle();

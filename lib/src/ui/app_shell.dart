@@ -33,6 +33,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   late final LibraryController _library;
   late EditorController _editor;
   int _index = _kLibrary;
+  bool _railOpen = true;
 
   AudioEngine get _audio => widget.dependencies.audioEngine;
 
@@ -149,37 +150,64 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
       body: SafeArea(
         child: Row(
           children: [
-            NavigationRail(
-              selectedIndex: _index,
-              onDestinationSelected: _select,
-              labelType: NavigationRailLabelType.all,
-              destinations: const [
-                NavigationRailDestination(
-                  icon: Icon(Icons.library_music_outlined),
-                  selectedIcon: Icon(Icons.library_music),
-                  label: Text('楽譜'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.piano_outlined),
-                  selectedIcon: Icon(Icons.piano),
-                  label: Text('練習'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.edit_outlined),
-                  selectedIcon: Icon(Icons.edit),
-                  label: Text('編集'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.music_note_outlined),
-                  selectedIcon: Icon(Icons.music_note),
-                  label: Text('演奏'),
-                ),
-              ],
-            ),
+            _railOpen ? _rail() : _collapsedBar(),
             const VerticalDivider(width: 1),
             Expanded(child: _content()),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 開いた状態のナビゲーションレール(先頭に閉じるボタン)。
+  Widget _rail() {
+    return NavigationRail(
+      selectedIndex: _index,
+      onDestinationSelected: _select,
+      labelType: NavigationRailLabelType.all,
+      leading: IconButton(
+        icon: const Icon(Icons.menu_open),
+        tooltip: 'メニューを閉じる',
+        onPressed: () => setState(() => _railOpen = false),
+      ),
+      destinations: const [
+        NavigationRailDestination(
+          icon: Icon(Icons.library_music_outlined),
+          selectedIcon: Icon(Icons.library_music),
+          label: Text('楽譜'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.piano_outlined),
+          selectedIcon: Icon(Icons.piano),
+          label: Text('練習'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.edit_outlined),
+          selectedIcon: Icon(Icons.edit),
+          label: Text('編集'),
+        ),
+        NavigationRailDestination(
+          icon: Icon(Icons.music_note_outlined),
+          selectedIcon: Icon(Icons.music_note),
+          label: Text('演奏'),
+        ),
+      ],
+    );
+  }
+
+  /// 閉じた状態の細い帯(開くボタンのみ)。本文を広く使える。
+  Widget _collapsedBar() {
+    return SizedBox(
+      width: 48,
+      child: Column(
+        children: [
+          const SizedBox(height: 4),
+          IconButton(
+            icon: const Icon(Icons.menu),
+            tooltip: 'メニューを開く',
+            onPressed: () => setState(() => _railOpen = true),
+          ),
+        ],
       ),
     );
   }
