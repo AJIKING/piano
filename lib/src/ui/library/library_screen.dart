@@ -1,75 +1,37 @@
 import 'package:flutter/material.dart';
 
 import '../../application/library_controller.dart';
-import '../../domain/audio/audio_engine.dart';
 import '../../domain/score/piece.dart';
-import '../editor/editor_screen.dart';
-import '../free/free_screen.dart';
-import '../practice/practice_screen.dart';
 import '../theme/etude_theme.dart';
 import 'now_practicing_card.dart';
 
-/// ライブラリ画面。「今練習中」カード＋マイ楽譜一覧＋楽譜作成。
+/// ライブラリ画面(レールの「楽譜」タブ)。「今練習中」カード＋マイ楽譜一覧＋作成。
+///
+/// 画面遷移は持たず、曲を開く操作は [onOpenPractice] / [onOpenEditor] に委ねる
+/// (シェルがタブを切り替える)。
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({
     super.key,
     required this.controller,
-    required this.audioEngine,
+    required this.onOpenPractice,
+    required this.onOpenEditor,
   });
 
   final LibraryController controller;
-  final AudioEngine audioEngine;
+  final void Function(Piece piece) onOpenPractice;
+  final void Function(Piece piece) onOpenEditor;
 
-  void _openPractice(BuildContext context, Piece piece) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => PracticeScreen(
-          piece: piece,
-          audioEngine: audioEngine,
-          // 弾き切ったら習得度を上げて最終練習日時を記録・永続化する。
-          onCompleted: () => controller.recordPractice(piece.id),
-        ),
-      ),
-    );
-  }
-
-  void _openEditor(BuildContext context, Piece piece) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => EditorScreen(
-          piece: piece,
-          audioEngine: audioEngine,
-          // 編集結果を永続化する。
-          onSave: controller.savePiece,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _create(BuildContext context) async {
+  Future<void> _create() async {
     final piece = await controller.createPiece();
-    if (context.mounted) _openEditor(context, piece);
+    onOpenEditor(piece);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ライブラリ'),
-        actions: [
-          IconButton(
-            tooltip: '自由演奏',
-            icon: const Icon(Icons.music_note_outlined),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => FreeScreen(audioEngine: audioEngine),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('ライブラリ')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _create(context),
+        onPressed: _create,
         icon: const Icon(Icons.add),
         label: const Text('楽譜を作成'),
       ),
@@ -85,7 +47,7 @@ class LibraryScreen extends StatelessWidget {
                 lastPracticedLabel: controller.lastPracticedLabel(
                   controller.featured,
                 ),
-                onResume: () => _openPractice(context, controller.featured),
+                onResume: () => onOpenPractice(controller.featured),
               ),
               const Padding(
                 padding: EdgeInsets.fromLTRB(8, 20, 8, 8),
@@ -102,8 +64,8 @@ class LibraryScreen extends StatelessWidget {
                 _PieceRow(
                   index: i,
                   piece: piece,
-                  onOpen: () => _openPractice(context, piece),
-                  onEdit: () => _openEditor(context, piece),
+                  onOpen: () => onOpenPractice(piece),
+                  onEdit: () => onOpenEditor(piece),
                 ),
             ],
           );

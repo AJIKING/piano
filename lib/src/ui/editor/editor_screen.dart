@@ -3,35 +3,38 @@ import 'package:flutter/material.dart';
 import '../../application/editor_controller.dart';
 import '../../application/practice_controller.dart';
 import '../../domain/audio/audio_engine.dart';
-import '../../domain/score/piece.dart';
-import '../practice/practice_screen.dart';
 import '../theme/etude_theme.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/score_view.dart';
 
-/// 楽譜エディタ。譜面/鍵盤タップで音符を追加・選択し、音価/♯ を編集する。
+/// 楽譜エディタ(レールの「編集」タブ)。譜面/鍵盤タップで音符を追加・選択し、
+/// 音価/♯ を編集する。
+///
+/// 編集状態 [controller] はシェルが所有する(タブを切り替えても保持される)。
+/// この widget は描画と試聴・練習への切替だけを担う。
 class EditorScreen extends StatefulWidget {
   const EditorScreen({
     super.key,
-    required this.piece,
+    required this.controller,
     required this.audioEngine,
-    this.onSave,
+    this.onPractice,
   });
 
-  final Piece piece;
+  final EditorController controller;
   final AudioEngine audioEngine;
 
-  /// 編集結果を保存する(LibraryStore へ永続化)。エディタを離れる時と練習開始時に呼ぶ。
-  final void Function(Piece piece)? onSave;
+  /// 「練習する」で練習タブへ切り替える(シェルが現在の編集内容で練習を開く)。
+  final VoidCallback? onPractice;
 
   @override
   State<EditorScreen> createState() => _EditorScreenState();
 }
 
 class _EditorScreenState extends State<EditorScreen> {
-  late final EditorController _editor;
   late final PracticeController _preview;
   late final TextEditingController _titleField;
+
+  EditorController get _editor => widget.controller;
 
   // 音価ツール。value=拍, label=表示, tip=説明(付点2分 / 2分 / 4分 / 8分)。
   static const _durations = <({double value, String label, String tip})>[
@@ -44,17 +47,15 @@ class _EditorScreenState extends State<EditorScreen> {
   @override
   void initState() {
     super.initState();
-    _editor = EditorController(piece: widget.piece);
     _preview = PracticeController(
-      piece: widget.piece,
+      piece: _editor.currentPiece,
       audioEngine: widget.audioEngine,
     );
-    _titleField = TextEditingController(text: widget.piece.title);
+    _titleField = TextEditingController(text: _editor.title);
   }
 
   @override
   void dispose() {
-    _editor.dispose();
     _preview.dispose();
     _titleField.dispose();
     super.dispose();
@@ -75,32 +76,13 @@ class _EditorScreenState extends State<EditorScreen> {
     }
   }
 
-  void _openPractice() {
+  void _practice() {
     _preview.stop();
-    widget.onSave?.call(_editor.currentPiece);
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => PracticeScreen(
-          piece: _editor.currentPiece,
-          audioEngine: widget.audioEngine,
-        ),
-      ),
-    );
+    widget.onPractice?.call();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
-      // 戻る操作で編集結果を永続化する(dispose 中だと再描画と競合するため)。
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) widget.onSave?.call(_editor.currentPiece);
-      },
-      child: _buildScaffold(),
-    );
-  }
-
-  Widget _buildScaffold() {
     return Scaffold(
       appBar: AppBar(
         title: const Text('楽譜エディタ'),
@@ -120,7 +102,7 @@ class _EditorScreenState extends State<EditorScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: FilledButton(
-              onPressed: _openPractice,
+              onPressed: _practice,
               child: const Text('練習する'),
             ),
           ),
