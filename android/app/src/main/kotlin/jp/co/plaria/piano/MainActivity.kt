@@ -1,4 +1,4 @@
-package jp.co.plaria.etude
+package jp.co.plaria.piano
 
 import io.flutter.embedding.android.FlutterActivity
 
