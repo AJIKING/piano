@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/clock.dart';
-import '../core/relative_date.dart';
 import '../domain/library/library_store.dart';
 import '../domain/score/mastery.dart';
 import '../domain/score/piece.dart';
 import '../domain/score/score_repository.dart';
 
-/// ライブラリ画面の状態。収録曲＋ユーザー曲のコレクションと「今練習中」を保持し、
+/// ライブラリ画面の状態。収録曲＋ユーザー曲のコレクションを保持し、
 /// 編集の保存・練習完了による習得度更新を永続化する。
 ///
 /// 初期化時は収録曲(`ScoreRepository`)で即座に seed し、画面はすぐ描画できる。
@@ -31,19 +30,14 @@ class LibraryController extends ChangeNotifier {
   /// ディスク内容が巻き戻る(lost update)のを防ぐ。
   Future<void> _writes = Future<void>.value();
 
-  /// 「今練習中」の曲(コレクション内の featured)。
+  /// 起動時に編集タブの既定として開く曲(収録曲の代表)。
   Piece get featured => _pieces.firstWhere(
     (p) => p.id == _featuredId,
     orElse: () => _seedFeatured,
   );
 
-  /// マイ楽譜の一覧(featured を除く収録曲＋ユーザー曲)。
-  List<Piece> get pieces =>
-      List.unmodifiable(_pieces.where((p) => p.id != _featuredId));
-
-  /// ある曲の「最終練習」相対ラベル(今日 / 昨日 / N 日前 / —)。
-  String lastPracticedLabel(Piece piece) =>
-      relativePracticeLabel(piece.lastPracticedAt, _clock.now());
+  /// 楽譜の一覧(収録曲＋ユーザー曲をすべて表示順で)。
+  List<Piece> get pieces => List.unmodifiable(_pieces);
 
   /// 永続化済みのコレクションがあれば読み込んで置き換える。
   /// 旧スキーマで featured を含まない保存データには featured を補う。

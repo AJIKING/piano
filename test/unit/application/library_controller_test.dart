@@ -14,10 +14,14 @@ void main() {
       );
 
   group('LibraryController', () {
-    test('初期化時に収録曲で seed され、featured は一覧から除かれる', () {
+    test('初期化時に収録曲で seed され、featured も一覧に含む', () {
       final controller = build();
       expect(controller.featured.id, 'fixture-two-beat');
-      expect(controller.pieces.map((p) => p.id), ['fixture-a', 'fixture-b']);
+      expect(controller.pieces.map((p) => p.id), [
+        'fixture-two-beat',
+        'fixture-a',
+        'fixture-b',
+      ]);
     });
 
     test('restore は保存済みコレクションで置き換える', () async {
@@ -26,15 +30,18 @@ void main() {
 
       await controller.restore();
 
-      // featured が無い保存データには featured を補い、一覧からは除く。
+      // featured が無い保存データには featured を補い、一覧に含める。
       expect(controller.featured.id, 'fixture-two-beat');
-      expect(controller.pieces.map((p) => p.id), ['fixture-empty']);
+      expect(controller.pieces.map((p) => p.id), [
+        'fixture-two-beat',
+        'fixture-empty',
+      ]);
     });
 
     test('restore は保存が空なら seed を保つ', () async {
       final controller = build();
       await controller.restore();
-      expect(controller.pieces, hasLength(2));
+      expect(controller.pieces, hasLength(3));
     });
 
     test('createPiece は自作曲を追加し、永続化し、通知する', () async {
@@ -47,7 +54,7 @@ void main() {
 
       expect(created.isUserCreated, isTrue);
       expect(controller.pieces.last.id, created.id);
-      expect(controller.pieces, hasLength(3));
+      expect(controller.pieces, hasLength(4));
       expect(store.saveCount, 1);
       expect(store.saved!.last.id, created.id);
       expect(notified, greaterThanOrEqualTo(1));
@@ -102,14 +109,6 @@ void main() {
       expect(controller.featured.masteryPercent, 12); // 0 → +12
       expect(controller.featured.lastPracticedAt, DateTime(2026, 1, 1, 9));
       expect(store.saveCount, 1);
-    });
-
-    test('lastPracticedLabel は未練習で —、練習当日で 今日', () async {
-      final controller = build(now: DateTime(2026, 1, 1, 9));
-      expect(controller.lastPracticedLabel(controller.featured), '—');
-
-      await controller.recordPractice('fixture-two-beat');
-      expect(controller.lastPracticedLabel(controller.featured), '今日');
     });
   });
 }

@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import '../../application/library_controller.dart';
 import '../../domain/score/piece.dart';
 import '../theme/etude_theme.dart';
-import 'now_practicing_card.dart';
 
-/// ライブラリ画面(レールの「楽譜」タブ)。「今練習中」カード＋マイ楽譜一覧＋作成。
+/// ライブラリ画面(レールの「楽譜」タブ)。楽譜一覧＋作成。
 ///
 /// 画面遷移は持たず、曲を開く操作は [onOpenPractice] / [onOpenEditor] に委ねる
 /// (シェルがタブを切り替える)。
@@ -42,24 +41,6 @@ class LibraryScreen extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
-              NowPracticingCard(
-                piece: controller.featured,
-                lastPracticedLabel: controller.lastPracticedLabel(
-                  controller.featured,
-                ),
-                onResume: () => onOpenPractice(controller.featured),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(8, 20, 8, 8),
-                child: Text(
-                  'マイ楽譜',
-                  style: TextStyle(
-                    fontSize: 11,
-                    letterSpacing: 1.6,
-                    color: EtudeColors.ivory2,
-                  ),
-                ),
-              ),
               for (final (i, piece) in pieces.indexed)
                 _PieceRow(
                   index: i,

@@ -27,14 +27,14 @@ void main() {
     ),
   );
 
-  testWidgets('featured カードと収録曲一覧を表示する', (tester) async {
+  testWidgets('収録曲一覧を表示する(featured も含む)', (tester) async {
     await tester.pumpWidget(wrap(buildController()));
 
-    expect(find.text('今練習中'), findsOneWidget);
-    expect(find.text('2 拍の単旋律'), findsOneWidget); // featured
+    expect(find.text('2 拍の単旋律'), findsOneWidget); // featured も一覧に
     expect(find.text('曲 A'), findsOneWidget);
     expect(find.text('曲 B'), findsOneWidget);
-    expect(find.text('マイ楽譜'), findsOneWidget);
+    // 「今練習中」カードは廃止。
+    expect(find.text('今練習中'), findsNothing);
   });
 
   testWidgets('曲タップで onOpenPractice にその曲が渡る', (tester) async {
@@ -53,7 +53,12 @@ void main() {
       wrap(buildController(), onOpenEditor: (p) => edited = p),
     );
 
-    await tester.tap(find.byTooltip('編集').first);
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(ListTile, '曲 A'),
+        matching: find.byTooltip('編集'),
+      ),
+    );
     expect(edited?.id, 'fixture-a');
   });
 
@@ -65,7 +70,7 @@ void main() {
     await tester.tap(find.text('楽譜を作成'));
     await tester.pumpAndSettle();
 
-    expect(controller.pieces, hasLength(3));
+    expect(controller.pieces, hasLength(4));
     expect(edited?.isUserCreated, isTrue);
   });
 }

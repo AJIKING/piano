@@ -106,7 +106,12 @@ void main() {
     // 楽譜タブへ戻り、曲 A(2 音符)の編集を開く。
     await tester.tap(find.text('楽譜'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('編集').first); // 曲 A
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(ListTile, '曲 A'),
+        matching: find.byTooltip('編集'),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.widgetWithText(TextField, '曲 A'), findsOneWidget);

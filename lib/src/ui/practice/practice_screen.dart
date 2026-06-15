@@ -32,6 +32,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
   late final PracticeController _controller;
   bool _audioReady = false;
 
+  /// 譜面でタップして選んだ「再生開始音符」(正準順インデックス)。
+  /// null なら先頭から再生する。
+  int? _startIndex;
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +65,18 @@ class _PracticeScreenState extends State<PracticeScreen> {
     return _geometry.xAtBeat(_controller.playheadBeats);
   }
 
+  /// 選択した音符があればその位置から、無ければ先頭から再生する。
+  void _togglePlay() {
+    if (_controller.isPlaying) {
+      _controller.stop();
+    } else {
+      final notes = widget.piece.sortedNotes;
+      final i = _startIndex;
+      final from = (i != null && i < notes.length) ? notes[i].beat : 0.0;
+      _controller.play(fromBeat: from);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,21 +86,44 @@ class _PracticeScreenState extends State<PracticeScreen> {
           // 譜面と再生コントロールは毎フレーム(再生ヘッド)更新する。
           ListenableBuilder(
             listenable: _controller,
-            builder: (context, _) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: ScoreView(
-                    piece: widget.piece,
-                    geometry: _geometry,
-                    litNoteIndex: _controller.litNoteIndex,
-                    playheadX: _playheadX(),
+            builder: (context, _) {
+              final playing = _controller.isPlaying;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: ScoreView(
+                      piece: widget.piece,
+                      geometry: _geometry,
+                      litNoteIndex: playing ? _controller.litNoteIndex : null,
+                      playheadX: _playheadX(),
+                      // 停止中は選んだ開始音符を強調。タップで開始位置を選ぶ。
+                      selectedIndex: playing ? null : _startIndex,
+                      onSelectNote: playing
+                          ? null
+                          : (i) => setState(() => _startIndex = i),
+                      // 余白タップで開始位置を解除し、先頭からに戻す。
+                      onAddAt: playing
+                          ? null
+                          : (_, _) => setState(() => _startIndex = null),
+                    ),
                   ),
-                ),
-                _controls(),
-              ],
-            ),
+                  if (!playing)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        '音符をタップすると、その位置から再生します',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: EtudeColors.ivory3,
+                        ),
+                      ),
+                    ),
+                  _controls(),
+                ],
+              );
+            },
           ),
           const Divider(height: 1),
           // 鍵盤は「鳴る音が変わった時」だけ再構築する(毎フレーム再構築を避ける)。
@@ -112,7 +151,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
       child: Row(
         children: [
           IconButton.filled(
-            onPressed: _controller.toggle,
+            onPressed: _togglePlay,
             icon: Icon(
               _controller.isPlaying
                   ? Icons.stop_rounded

@@ -83,8 +83,7 @@ lib/
         ├── theme/
         │   └── etude_theme.dart    # デザイントークン(色・フォント・spacing・dark 基調)
         ├── library/
-        │   ├── library_screen.dart
-        │   └── now_practicing_card.dart  # 「今練習中」カード
+        │   └── library_screen.dart       # 楽譜一覧+作成
         ├── practice/
         │   └── practice_screen.dart      # 譜面+鍵盤+再生(実装済み)
         ├── editor/
