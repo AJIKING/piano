@@ -93,6 +93,8 @@ class LibraryController extends ChangeNotifier {
   }
 
   /// 練習を 1 回弾き切ったときの記録。習得度を上げ、最終練習日時を更新する。
+  /// 注: 「今練習中」カード廃止により、現状この値を表示する UI は無い。
+  /// データとしては保持し続ける(将来の進捗表示に備える)。
   Future<void> recordPractice(String pieceId) async {
     final i = _pieces.indexWhere((p) => p.id == pieceId);
     if (i < 0) return;

@@ -30,6 +30,7 @@ class PracticeScreen extends StatefulWidget {
 class _PracticeScreenState extends State<PracticeScreen> {
   static const _geometry = ScoreGeometry();
   late final PracticeController _controller;
+  final ScrollController _scoreScroll = ScrollController();
   bool _audioReady = false;
 
   /// 譜面でタップして選んだ「再生開始音符」(正準順インデックス)。
@@ -44,12 +45,33 @@ class _PracticeScreenState extends State<PracticeScreen> {
       audioEngine: widget.audioEngine,
       onCompleted: widget.onCompleted,
     );
+    // 鳴る音が変わるたびに(=毎フレームではなく)再生ヘッドを追従させる。
+    _controller.litPitches.addListener(_followPlayhead);
   }
 
   @override
   void dispose() {
+    _controller.litPitches.removeListener(_followPlayhead);
     _controller.dispose();
+    _scoreScroll.dispose();
     super.dispose();
+  }
+
+  /// 再生中、再生ヘッドが見切れたら譜面をスクロールして追従する。
+  void _followPlayhead() {
+    if (!_controller.isPlaying) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scoreScroll.hasClients) return;
+      final x = _geometry.xAtBeat(_controller.playheadBeats);
+      final pos = _scoreScroll.position;
+      if (x < pos.pixels + 40 || x > pos.pixels + pos.viewportDimension - 40) {
+        _scoreScroll.animateTo(
+          (x - pos.viewportDimension * 0.5).clamp(0.0, pos.maxScrollExtent),
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _onKey(String pitch) {
@@ -96,24 +118,24 @@ class _PracticeScreenState extends State<PracticeScreen> {
                     child: ScoreView(
                       piece: widget.piece,
                       geometry: _geometry,
+                      scrollController: _scoreScroll,
                       litNoteIndex: playing ? _controller.litNoteIndex : null,
                       playheadX: _playheadX(),
-                      // 停止中は選んだ開始音符を強調。タップで開始位置を選ぶ。
+                      // 停止中は選んだ開始音符を強調。音符タップで開始位置を選び、
+                      // 同じ音符を再タップで解除して先頭からに戻す。
                       selectedIndex: playing ? null : _startIndex,
                       onSelectNote: playing
                           ? null
-                          : (i) => setState(() => _startIndex = i),
-                      // 余白タップで開始位置を解除し、先頭からに戻す。
-                      onAddAt: playing
-                          ? null
-                          : (_, _) => setState(() => _startIndex = null),
+                          : (i) => setState(
+                              () => _startIndex = _startIndex == i ? null : i,
+                            ),
                     ),
                   ),
                   if (!playing)
                     const Padding(
                       padding: EdgeInsets.only(bottom: 6),
                       child: Text(
-                        '音符をタップすると、その位置から再生します',
+                        '音符をタップでその位置から再生(再タップで解除)',
                         style: TextStyle(
                           fontSize: 11,
                           color: EtudeColors.ivory3,
