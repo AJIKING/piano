@@ -30,7 +30,10 @@ void main() {
         .where((p) => p.fullNotes.isNotEmpty)
         .map((p) => p.id)
         .toList();
-    expect(withFull, containsAll(['fur-elise', 'gymnopedie-1', 'bwv846']));
+    expect(
+      withFull,
+      containsAll(['fur-elise', 'gymnopedie-1', 'bwv846', 'prelude-e-minor']),
+    );
     // fullNotes は音域(C3–B5)に縛られないが、音名・音価・非負拍は妥当であること。
     for (final p in allPieces()) {
       for (final n in p.fullNotes) {

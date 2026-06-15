@@ -72,6 +72,7 @@ void main() {
     Cfg('fuer_elise', '_furElise', 60, 3, 76), // C4 以上=右手旋律
     Cfg('gymnopedie_1', '_gymnopedie', 67, 3, 66), // G4 以上=旋律(内声除外)
     Cfg('bach_prelude_c', '_bwv846', null, 4, 72), // 分散和音そのまま
+    Cfg('chopin_prelude_e_minor', '_preludeEMinor', 68, 4, 56), // G#4 以上=旋律
   ];
 
   for (final cfg in cfgs) {
