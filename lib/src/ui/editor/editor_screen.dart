@@ -40,6 +40,7 @@ class _EditorScreenState extends State<EditorScreen> {
   final ScrollController _scoreScroll = ScrollController();
   double? _lastCaret;
   bool _toolsVisible = true;
+  bool _previewing = false;
 
   EditorController get _editor => widget.controller;
 
@@ -61,15 +62,44 @@ class _EditorScreenState extends State<EditorScreen> {
     _titleField = TextEditingController(text: _editor.title);
     _editAndPreview = Listenable.merge([_editor, _preview]);
     _editor.addListener(_keepCaretVisible);
+    _preview.addListener(_onPreviewChanged);
+    // 鳴る音が変わるたびに(=毎フレームではなく)再生ヘッドを追従させる。
+    _preview.litPitches.addListener(_followPlayhead);
   }
 
   @override
   void dispose() {
     _editor.removeListener(_keepCaretVisible);
+    _preview.litPitches.removeListener(_followPlayhead);
+    _preview.removeListener(_onPreviewChanged);
     _preview.dispose();
     _titleField.dispose();
     _scoreScroll.dispose();
     super.dispose();
+  }
+
+  /// 試聴の開始/停止に合わせて編集ロック状態を切り替える(毎フレームではなく状態変化時のみ)。
+  void _onPreviewChanged() {
+    if (_preview.isPlaying != _previewing) {
+      setState(() => _previewing = _preview.isPlaying);
+    }
+  }
+
+  /// 試聴中、再生ヘッドが見切れたら譜面をスクロールして追従する。
+  void _followPlayhead() {
+    if (!_preview.isPlaying) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scoreScroll.hasClients) return;
+      final x = _geometry.xAtBeat(_preview.playheadBeats);
+      final pos = _scoreScroll.position;
+      if (x < pos.pixels + 40 || x > pos.pixels + pos.viewportDimension - 40) {
+        _scoreScroll.animateTo(
+          (x - pos.viewportDimension * 0.5).clamp(0.0, pos.maxScrollExtent),
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   /// 編集でキャレットが動いたら、譜面が見切れないよう自動スクロールする。
@@ -97,6 +127,8 @@ class _EditorScreenState extends State<EditorScreen> {
   void _onKeyboard(String pitch) {
     widget.audioEngine.init();
     widget.audioEngine.playNote(pitch);
+    // 試聴中は弾き合わせのみ(音符は追加しない。発音と描画の乖離を防ぐ)。
+    if (_previewing) return;
     _editor.addNoteFromKeyboard(pitch);
   }
 
@@ -107,9 +139,8 @@ class _EditorScreenState extends State<EditorScreen> {
       _preview.piece = _editor.currentPiece;
       // 音符を選択していればその位置から、無ければ先頭から試聴する。
       final i = _editor.selectedIndex;
-      final from = (i != null && i < _editor.notes.length)
-          ? _editor.notes[i].beat
-          : 0.0;
+      final notes = _editor.notes;
+      final from = (i != null && i < notes.length) ? notes[i].beat : 0.0;
       _preview.play(fromBeat: from);
     }
   }
@@ -171,9 +202,16 @@ class _EditorScreenState extends State<EditorScreen> {
         children: [
           _titleBar(),
           if (_toolsVisible)
-            ListenableBuilder(
-              listenable: _editor,
-              builder: (context, _) => _toolbar(),
+            // 試聴中は編集ロック(発音スナップショットと描画の乖離を防ぐ)。
+            AbsorbPointer(
+              absorbing: _previewing,
+              child: Opacity(
+                opacity: _previewing ? 0.4 : 1,
+                child: ListenableBuilder(
+                  listenable: _editor,
+                  builder: (context, _) => _toolbar(),
+                ),
+              ),
             ),
           _toolsHandle(),
           // 編集中はキャレット/選択、試聴中は再生ヘッド/該当音符をハイライトする。

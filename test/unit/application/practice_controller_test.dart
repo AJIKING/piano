@@ -166,6 +166,32 @@ void main() {
       });
     });
 
+    test('最後の音符の位置から試聴するとその音だけ鳴る', () {
+      fakeAsync((async) {
+        final audio = RecordingAudioEngine();
+        final piece = Piece(
+          id: 'p',
+          title: 't',
+          composer: 'c',
+          notes: const [
+            Note(pitch: 'C4', beat: 0, duration: 1),
+            Note(pitch: 'E4', beat: 1, duration: 1),
+            Note(pitch: 'G4', beat: 2, duration: 1),
+          ],
+        );
+        final c = PracticeController(piece: piece, audioEngine: audio, bpm: 60);
+
+        c.play(fromBeat: 2); // 最後の音符 G4 の位置から
+        async.elapse(const Duration(milliseconds: 300));
+
+        expect(audio.playedPitches, ['G4']);
+
+        c.stop();
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
     test('同 beat の音符(和音)はすべて発音される', () {
       fakeAsync((async) {
         final audio = RecordingAudioEngine();

@@ -84,6 +84,25 @@ void main() {
     expect(find.text('音符数: 0'), findsOneWidget);
   });
 
+  testWidgets('試聴中は鍵盤で音符が増えない(弾き合わせのみ)', (tester) async {
+    final audio = RecordingAudioEngine();
+    await tester.pumpWidget(
+      wrap(EditorController(piece: twoBeatMelody()), audio: audio),
+    );
+
+    await tester.tap(find.text('試聴'));
+    await tester.pump();
+    expect(find.text('停止'), findsOneWidget); // 試聴中
+
+    await tester.tap(find.byKey(const ValueKey('key-C3')));
+    await tester.pump();
+    expect(find.text('音符数: 2'), findsOneWidget); // 増えない
+    expect(audio.playedPitches, contains('C3')); // 音は鳴る
+
+    await tester.tap(find.text('停止')); // タイマー後始末
+    await tester.pump();
+  });
+
   testWidgets('ハンドルでツールバーを表示/非表示できる', (tester) async {
     await tester.pumpWidget(wrap(EditorController(piece: emptyUserPiece())));
     expect(find.byTooltip('戻る'), findsOneWidget); // 既定で表示
