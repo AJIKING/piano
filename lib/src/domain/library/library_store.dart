@@ -1,6 +1,6 @@
 import '../score/piece.dart';
 
-/// ユーザーの楽譜コレクション(自作曲・習得度・最終練習日時)を永続化する境界。
+/// ユーザーの楽譜コレクション(自作曲・編集した収録曲)を永続化する境界。
 /// テストではインメモリ fake に差し替える。実装は data 層(`PrefsLibraryStore`)。
 /// 永続化方式は ADR 0001。
 abstract interface class LibraryStore {

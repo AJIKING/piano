@@ -69,5 +69,29 @@ void main() {
       expect(restored.defaultBpm, 96);
       expect(restored.notes, piece.notes);
     });
+
+    test('旧スキーマの JSON も読める(余分キーは無視・欠損は既定値)', () {
+      // 旧バージョンの保存データ: 廃止した stars/masteryPercent/lastPracticedAt を
+      // 含み、追加した beatsPerMeasure/defaultBpm を含まない。
+      final oldJson = <String, Object?>{
+        'id': 'old-1',
+        'title': '旧データ',
+        'composer': '作者',
+        'stars': 4,
+        'masteryPercent': 80,
+        'lastPracticedAt': '2026-01-02T10:30:00.000',
+        'isUserCreated': true,
+        'notes': [
+          {'pitch': 'C4', 'beat': 0, 'duration': 1},
+        ],
+      };
+
+      final p = Piece.fromJson(oldJson); // 例外を投げない
+      expect(p.id, 'old-1');
+      expect(p.isUserCreated, isTrue);
+      expect(p.beatsPerMeasure, 3); // 欠損 → 既定
+      expect(p.defaultBpm, 72); // 欠損 → 既定
+      expect(p.notes, hasLength(1));
+    });
   });
 }

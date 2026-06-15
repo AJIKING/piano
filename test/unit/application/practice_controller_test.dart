@@ -58,6 +58,36 @@ void main() {
       });
     });
 
+    test('メトロノームの強拍は曲の拍子に従う(4/4 は 4 拍ごと)', () {
+      fakeAsync((async) {
+        final audio = RecordingAudioEngine();
+        // 4/4・十分長い曲(8 拍目まで自動停止しない)。
+        final piece = Piece(
+          id: 'p',
+          title: 't',
+          composer: 'c',
+          beatsPerMeasure: 4,
+          notes: const [
+            Note(pitch: 'C4', beat: 0, duration: 1),
+            Note(pitch: 'C4', beat: 8, duration: 1),
+          ],
+        );
+        final c = PracticeController(piece: piece, audioEngine: audio, bpm: 60);
+        c.toggleMetronome();
+
+        c.play();
+        async.elapse(const Duration(milliseconds: 7500)); // 拍 0〜7 をクリック
+
+        // 4/4 なら強拍 C3 は拍 0・4 の 2 回(3/4 なら 0・3・6 で 3 回になる)。
+        final strongClicks = audio.playedPitches.where((p) => p == 'C3').length;
+        expect(strongClicks, 2);
+
+        c.stop();
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
     test('BPM 変更の瞬間に再生位置(playheadBeats)は飛ばない', () {
       fakeAsync((async) {
         final c = PracticeController(

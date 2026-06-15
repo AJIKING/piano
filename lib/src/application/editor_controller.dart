@@ -54,7 +54,7 @@ class EditorController extends ChangeNotifier {
   /// 旋律の終端拍。
   double get contentEnd => Piece.contentEndOf(_notes);
 
-  /// 編集結果を反映した曲(作曲者・難易度などは元の値を保つ)。
+  /// 編集結果を反映した曲(作曲者・拍子・既定テンポなどは元の値を保つ)。
   Piece get currentPiece =>
       _piece.copyWith(title: _title, notes: List<Note>.of(_notes));
 
