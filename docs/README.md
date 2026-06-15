@@ -2,7 +2,7 @@
 
 | ドキュメント | 内容 |
 | --- | --- |
-| [product-spec.md](product-spec.md) | 今回開発するピアノ練習＆楽譜エディタ「Étude」の仕様。プロトタイプ `prototype/etude-piano-app.html` から抽出 |
+| [product-spec.md](product-spec.md) | 今回開発するピアノ練習＆楽譜エディタ「ピアノノート」の仕様。プロトタイプ `prototype/etude-piano-app.html` から抽出 |
 | [architecture.md](architecture.md) | Flutter アーキテクチャとフォルダ構成(レイヤー、差し替え境界の配置、依存ルール) |
 | [test-plan.md](test-plan.md) | ハーネス方針を本アプリに適用した具体的なテスト計画 |
 | [harness-engineering.md](harness-engineering.md) | ハーネスエンジニアリングの全体方針(レイヤー、品質ゲート、flaky ポリシー、CI 設計) |

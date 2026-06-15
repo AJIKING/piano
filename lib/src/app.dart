@@ -14,7 +14,7 @@ class EtudeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Étude',
+      title: 'ピアノノート',
       debugShowCheckedModeBanner: false,
       theme: EtudeTheme.dark(),
       home: AppShell(dependencies: dependencies),

@@ -10,7 +10,7 @@
 
 ## 関連ドキュメント
 
-- `docs/product-spec.md`: 今回開発するピアノ練習＆楽譜エディタ「Étude」の仕様(プロトタイプ `docs/prototype/etude-piano-app.html` 準拠)。
+- `docs/product-spec.md`: 今回開発するピアノ練習＆楽譜エディタ「ピアノノート」の仕様(プロトタイプ `docs/prototype/etude-piano-app.html` 準拠)。
 - `docs/architecture.md`: Flutter アーキテクチャとフォルダ構成(レイヤー、差し替え境界の配置、依存ルール)。
 - `docs/test-plan.md`: この方針を本アプリに適用した具体的なテスト計画(何をどの層で守るか、差し替え境界の具体化)。
 - `CLAUDE.md`: 日常コマンドと開発規約の要約。

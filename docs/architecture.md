@@ -1,4 +1,4 @@
-# Étude — Flutter アーキテクチャとフォルダ構成
+# ピアノノート — Flutter アーキテクチャとフォルダ構成
 
 `docs/product-spec.md` の仕様と `docs/test-plan.md` の差し替え境界を実現するためのアプリ構造を定義する。判断基準はハーネス方針(`docs/harness-engineering.md`)と同じ: **決定的にテストできること、必要になるまで複雑にしないこと。**
 

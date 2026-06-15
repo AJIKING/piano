@@ -1,4 +1,4 @@
-# Étude — テスト計画
+# ピアノノート — テスト計画
 
 `docs/harness-engineering.md` の方針を `docs/product-spec.md` の仕様に適用した具体計画。新しい機能を実装するときは、この表に対応する層のテストを同じ PR に含める。
 
