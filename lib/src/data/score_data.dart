@@ -378,14 +378,17 @@ const List<Note> _aveMaria = [
 ];
 
 // エンターテイナー(ジョプリン)ハ長調・2/4。ラグタイム。
+// 原曲は高い C(C6)が E の上に跳ねるのが特徴。鍵盤上限(B5)に収めるため
+// 全体を 1 オクターブ下げ、「C は E の上(6度上)」という輪郭を保つ。
 const List<Note> _entertainer = [
-  Note(pitch: 'D5', beat: 0, duration: 0.25),
-  Note(pitch: 'D#5', beat: 0.25, duration: 0.25),
-  Note(pitch: 'E5', beat: 0.5, duration: 0.5),
+  Note(pitch: 'D4', beat: 0, duration: 0.25),
+  Note(pitch: 'D#4', beat: 0.25, duration: 0.25),
+  Note(pitch: 'E4', beat: 0.5, duration: 0.5),
   Note(pitch: 'C5', beat: 1, duration: 0.5),
-  Note(pitch: 'E5', beat: 1.5, duration: 0.5),
+  Note(pitch: 'E4', beat: 1.5, duration: 0.5),
   Note(pitch: 'C5', beat: 2, duration: 0.5),
-  Note(pitch: 'E5', beat: 2.5, duration: 1),
+  Note(pitch: 'E4', beat: 2.5, duration: 0.5),
+  Note(pitch: 'C5', beat: 3, duration: 1),
   Note(pitch: 'C5', beat: 4, duration: 0.5),
   Note(pitch: 'D5', beat: 4.5, duration: 0.5),
   Note(pitch: 'D#5', beat: 5, duration: 0.5),
@@ -393,7 +396,7 @@ const List<Note> _entertainer = [
   Note(pitch: 'C5', beat: 6, duration: 0.5),
   Note(pitch: 'D5', beat: 6.5, duration: 0.5),
   Note(pitch: 'E5', beat: 7, duration: 0.5),
-  Note(pitch: 'B4', beat: 7.5, duration: 0.5),
+  Note(pitch: 'C5', beat: 7.5, duration: 0.5),
   Note(pitch: 'D5', beat: 8, duration: 1),
   Note(pitch: 'C5', beat: 9, duration: 1),
 ];
