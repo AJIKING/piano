@@ -37,6 +37,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
   /// 両手(大譜表＋両手再生)モード。収録曲で fullNotes がある時だけ使える。
   bool _twoHand = false;
 
+  /// 再生中にユーザーが手動スクロールしたら、自動追従を一時停止する
+  /// (見たい所を見続けられるように)。次の再生開始でリセット。
+  bool _followPaused = false;
+
   /// 両手/片手を切り替える。再生対象(controller.piece)も差し替える。
   void _toggleTwoHand() {
     _controller.stop();
@@ -70,8 +74,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   /// 再生中、再生ヘッドが見切れたら譜面をスクロールして追従する。
+  /// ただしユーザーが手動スクロール中(`_followPaused`)は追従しない。
   void _followPlayhead() {
-    if (!_controller.isPlaying) return;
+    if (!_controller.isPlaying || _followPaused) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scoreScroll.hasClients) return;
       final x = _geometry.xAtBeat(_controller.playheadBeats);
@@ -104,6 +109,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
     if (_controller.isPlaying) {
       _controller.stop();
     } else {
+      _followPaused = false; // 再生開始で追従を復帰。
       final notes = widget.piece.sortedNotes;
       final i = _startIndex;
       final from = (i != null && i < notes.length) ? notes[i].beat : 0.0;
@@ -141,37 +147,44 @@ class _PracticeScreenState extends State<PracticeScreen> {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 2, 12, 4),
-                    child: _twoHand
-                        ? GrandStaffView(
-                            notes: widget.piece.fullNotes,
-                            beatsPerMeasure: widget.piece.beatsPerMeasure,
-                            scrollController: _scoreScroll,
-                            litNoteIndices: playing
-                                ? _controller.litNoteIndices
-                                : const {},
-                            playheadX: _playheadX(),
-                          )
-                        : ScoreView(
-                            piece: widget.piece,
-                            geometry: _geometry,
-                            scrollController: _scoreScroll,
-                            litNoteIndices: playing
-                                ? _controller.litNoteIndices
-                                : const {},
-                            playheadX: _playheadX(),
-                            // 停止中は選んだ開始音符を強調。タップで開始位置を選び、
-                            // 同じ音符を再タップで解除して先頭からに戻す。
-                            selectedIndex: playing ? null : _startIndex,
-                            onSelectNote: playing
-                                ? null
-                                : (i) => setState(
-                                    () => _startIndex = _startIndex == i
-                                        ? null
-                                        : i,
-                                  ),
-                          ),
+                  // 手動ドラッグを検知したら自動追従を止める(見たい所を見続ける)。
+                  NotificationListener<ScrollStartNotification>(
+                    onNotification: (n) {
+                      if (n.dragDetails != null) _followPaused = true;
+                      return false;
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 2, 12, 4),
+                      child: _twoHand
+                          ? GrandStaffView(
+                              notes: widget.piece.fullNotes,
+                              beatsPerMeasure: widget.piece.beatsPerMeasure,
+                              scrollController: _scoreScroll,
+                              litNoteIndices: playing
+                                  ? _controller.litNoteIndices
+                                  : const {},
+                              playheadX: _playheadX(),
+                            )
+                          : ScoreView(
+                              piece: widget.piece,
+                              geometry: _geometry,
+                              scrollController: _scoreScroll,
+                              litNoteIndices: playing
+                                  ? _controller.litNoteIndices
+                                  : const {},
+                              playheadX: _playheadX(),
+                              // 停止中は選んだ開始音符を強調。タップで開始位置を選び、
+                              // 同じ音符を再タップで解除して先頭からに戻す。
+                              selectedIndex: playing ? null : _startIndex,
+                              onSelectNote: playing
+                                  ? null
+                                  : (i) => setState(
+                                      () => _startIndex = _startIndex == i
+                                          ? null
+                                          : i,
+                                    ),
+                            ),
+                    ),
                   ),
                   _controls(),
                 ],

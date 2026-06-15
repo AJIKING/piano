@@ -42,6 +42,10 @@ class _EditorScreenState extends State<EditorScreen> {
   bool _toolsVisible = true;
   bool _previewing = false;
 
+  /// 試聴中にユーザーが手動スクロールしたら、自動追従を一時停止する。
+  /// 次の試聴開始でリセット。
+  bool _followPaused = false;
+
   EditorController get _editor => widget.controller;
 
   // 音価ツール。value=拍, label=表示, tip=説明。
@@ -90,7 +94,7 @@ class _EditorScreenState extends State<EditorScreen> {
 
   /// 試聴中、再生ヘッドが見切れたら譜面をスクロールして追従する。
   void _followPlayhead() {
-    if (!_preview.isPlaying) return;
+    if (!_preview.isPlaying || _followPaused) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scoreScroll.hasClients) return;
       final x = _geometry.xAtBeat(_preview.playheadBeats);
@@ -139,6 +143,7 @@ class _EditorScreenState extends State<EditorScreen> {
     if (_preview.isPlaying) {
       _preview.stop();
     } else {
+      _followPaused = false; // 試聴開始で追従を復帰。
       _preview.piece = _editor.currentPiece;
       // 音符を選択していればその位置から、無ければ先頭から試聴する。
       final i = _editor.selectedIndex;
@@ -222,28 +227,35 @@ class _EditorScreenState extends State<EditorScreen> {
             listenable: _editAndPreview,
             builder: (context, _) {
               final previewing = _preview.isPlaying;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: ScoreView(
-                  piece: _editor.currentPiece,
-                  geometry: _geometry,
-                  selectedIndex: previewing ? null : _editor.selectedIndex,
-                  caretBeat: previewing ? null : _editor.insertBeat,
-                  litNoteIndices: previewing
-                      ? _preview.litNoteIndices
-                      : const {},
-                  playheadX: previewing
-                      ? _geometry.xAtBeat(_preview.playheadBeats)
-                      : null,
-                  snap: _editor.currentDuration,
-                  height: 120,
-                  scrollController: _scoreScroll,
-                  // 試聴中は誤編集を避けるためタップを無効化する。
-                  onAddAt: previewing
-                      ? null
-                      : (beat, step) =>
-                            _editor.addNoteAtStep(beat: beat, step: step),
-                  onSelectNote: previewing ? null : _editor.selectNote,
+              // 試聴中の手動ドラッグで自動追従を止める。
+              return NotificationListener<ScrollStartNotification>(
+                onNotification: (n) {
+                  if (n.dragDetails != null) _followPaused = true;
+                  return false;
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: ScoreView(
+                    piece: _editor.currentPiece,
+                    geometry: _geometry,
+                    selectedIndex: previewing ? null : _editor.selectedIndex,
+                    caretBeat: previewing ? null : _editor.insertBeat,
+                    litNoteIndices: previewing
+                        ? _preview.litNoteIndices
+                        : const {},
+                    playheadX: previewing
+                        ? _geometry.xAtBeat(_preview.playheadBeats)
+                        : null,
+                    snap: _editor.currentDuration,
+                    height: 120,
+                    scrollController: _scoreScroll,
+                    // 試聴中は誤編集を避けるためタップを無効化する。
+                    onAddAt: previewing
+                        ? null
+                        : (beat, step) =>
+                              _editor.addNoteAtStep(beat: beat, step: step),
+                    onSelectNote: previewing ? null : _editor.selectNote,
+                  ),
                 ),
               );
             },
