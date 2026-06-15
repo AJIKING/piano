@@ -36,26 +36,6 @@ void main() {
     expect(audio.playedPitches, ['C3']);
   });
 
-  testWidgets('停止中は開始位置のガイドを表示し、再生中は消える', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: PracticeScreen(
-          piece: twoBeatMelody(),
-          audioEngine: RecordingAudioEngine(),
-        ),
-      ),
-    );
-
-    expect(find.text('音符をタップでその位置から再生(再タップで解除)'), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.play_arrow_rounded));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('音符をタップでその位置から再生(再タップで解除)'), findsNothing);
-
-    await tester.tap(find.byIcon(Icons.stop_rounded)); // タイマー後始末
-    await tester.pump();
-  });
-
   testWidgets('音符をタップするとその位置から再生する(前の音は鳴らさない)', (tester) async {
     final audio = RecordingAudioEngine();
     await tester.pumpWidget(

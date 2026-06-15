@@ -10,7 +10,7 @@ class ScoreGeometry {
     this.pxPerBeat = 30,
     this.staffGap = 8,
     this.topY = 18,
-    this.noteX0 = 80,
+    this.noteX0 = 44,
   });
 
   /// 1 拍あたりの横幅(px)。

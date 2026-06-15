@@ -53,7 +53,7 @@ class _FreeScreenState extends State<FreeScreen> {
             padding: const EdgeInsets.only(right: 20, bottom: 12),
             child: Align(
               alignment: Alignment.centerRight,
-              child: _lastNoteLabel(big: true),
+              child: _lastNoteLabel(),
             ),
           ),
           PianoKeyboard(
@@ -84,7 +84,6 @@ class _FreeScreenState extends State<FreeScreen> {
                 ),
               ),
             ),
-            Positioned(top: 8, left: 12, child: _lastNoteLabel(big: false)),
             Positioned(
               top: 4,
               right: 4,
@@ -104,18 +103,16 @@ class _FreeScreenState extends State<FreeScreen> {
     );
   }
 
-  Widget _lastNoteLabel({required bool big}) {
+  Widget _lastNoteLabel() {
     return Column(
-      crossAxisAlignment: big
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           _lastNote,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'ShipporiMincho',
-            fontSize: big ? 34 : 22,
+            fontSize: 34,
             color: EtudeColors.brassSoft,
           ),
         ),

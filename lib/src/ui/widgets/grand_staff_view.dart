@@ -40,7 +40,7 @@ class GrandStaffView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final contentEnd = Piece.contentEndOf(notes);
-    final rawWidth = geometry.xAtBeat(contentEnd) + 28;
+    final rawWidth = geometry.xAtBeat(contentEnd) + 16;
     final width = rawWidth < 280 ? 280.0 : rawWidth;
     return SizedBox(
       height: height,
@@ -107,15 +107,15 @@ class _GrandStaffPainter extends CustomPainter {
     final right = size.width - 8;
     for (final s in [..._trebleSteps, ..._bassSteps]) {
       final y = _y(s);
-      canvas.drawLine(Offset(40, y), Offset(right, y), linePaint);
+      canvas.drawLine(Offset(18, y), Offset(right, y), linePaint);
     }
 
     // 左の連結(大譜表の括り)。両譜表を縦線でつなぐ。
     final braceTop = _y(8);
     final braceBottom = _y(-12);
     canvas.drawLine(
-      Offset(40, braceTop),
-      Offset(40, braceBottom),
+      Offset(18, braceTop),
+      Offset(18, braceBottom),
       Paint()
         ..color = _staffLine
         ..strokeWidth = 2.2,

@@ -142,7 +142,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.fromLTRB(12, 2, 12, 4),
                     child: _twoHand
                         ? GrandStaffView(
                             notes: widget.piece.fullNotes,
@@ -174,17 +174,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
                                   ),
                           ),
                   ),
-                  if (!playing && !_twoHand)
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 6),
-                      child: Text(
-                        '音符をタップでその位置から再生(再タップで解除)',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: EtudeColors.ivory3,
-                        ),
-                      ),
-                    ),
                   _controls(),
                 ],
               );

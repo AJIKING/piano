@@ -71,7 +71,7 @@ class ScoreView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final contentEnd = piece.contentEnd;
-    final rawWidth = geometry.xAtBeat(contentEnd) + 28;
+    final rawWidth = geometry.xAtBeat(contentEnd) + 16;
     final width = rawWidth < 280 ? 280.0 : rawWidth;
     final interactive = onAddAt != null || onSelectNote != null;
     Widget paint = CustomPaint(

@@ -7,16 +7,16 @@ void main() {
 
   group('拍 ↔ x', () {
     test('xAtBeat は noteX0 + beat*pxPerBeat', () {
-      expect(g.xAtBeat(0), 80);
-      expect(g.xAtBeat(1), 110);
-      expect(g.xAtBeat(2.5), 80 + 2.5 * 30);
+      expect(g.xAtBeat(0), 44);
+      expect(g.xAtBeat(1), 74);
+      expect(g.xAtBeat(2.5), 44 + 2.5 * 30);
     });
 
     test('beatFromX は snap 単位に丸め、負は 0 にクランプ', () {
-      expect(g.beatFromX(110), 1);
+      expect(g.beatFromX(74), 1);
       expect(g.beatFromX(0), 0);
       expect(g.beatFromX(-50), 0);
-      expect(g.beatFromX(95, snap: 0.5), 0.5);
+      expect(g.beatFromX(59, snap: 0.5), 0.5);
     });
   });
 
