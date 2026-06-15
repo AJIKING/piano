@@ -59,17 +59,17 @@ void main() {
     expect(find.byTooltip('戻る'), findsOneWidget);
     expect(find.byTooltip('進む'), findsOneWidget);
     expect(find.byTooltip('末尾へ(末尾に追加しやすくする)'), findsOneWidget);
-    // original 無し → 最初に戻すは非表示。
-    expect(find.text('最初に戻す'), findsNothing);
+    // original 無し → リセット(最初に戻す)は非表示。
+    expect(find.byTooltip('最初に戻す'), findsNothing);
   });
 
-  testWidgets('収録曲(original あり)では最初に戻すが出る', (tester) async {
+  testWidgets('収録曲(original あり)ではリセットアイコンが出る', (tester) async {
     final original = twoBeatMelody();
     await tester.pumpWidget(
       wrap(EditorController(piece: original, original: original)),
     );
 
-    expect(find.text('最初に戻す'), findsOneWidget);
+    expect(find.byTooltip('最初に戻す'), findsOneWidget);
   });
 
   testWidgets('鍵盤で追加 → 戻るで音符数が減る', (tester) async {
@@ -82,5 +82,18 @@ void main() {
     await tester.tap(find.byTooltip('戻る'));
     await tester.pump();
     expect(find.text('音符数: 0'), findsOneWidget);
+  });
+
+  testWidgets('ハンドルでツールバーを表示/非表示できる', (tester) async {
+    await tester.pumpWidget(wrap(EditorController(piece: emptyUserPiece())));
+    expect(find.byTooltip('戻る'), findsOneWidget); // 既定で表示
+
+    await tester.tap(find.byIcon(Icons.keyboard_arrow_up)); // 閉じる
+    await tester.pump();
+    expect(find.byTooltip('戻る'), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.keyboard_arrow_down)); // 開く
+    await tester.pump();
+    expect(find.byTooltip('戻る'), findsOneWidget);
   });
 }

@@ -37,7 +37,7 @@
 | 鍵盤(`PianoKeyboard`) | 白鍵・黒鍵の配置 / タップで `AudioEngine.playNote` が呼ばれる(記録 fake で検証)/ Semantics ラベル / 再生・試聴中は鳴っている鍵をハイライト(`litPitches`) |
 | 譜面(`ScoreView`) | 音符・小節線・再生ヘッドの描画(golden 化は後続)/ 再生中ハイライト |
 | 練習(`PracticeScreen`) | 再生 / 停止トグル / テンポスライダーの反映 / メトロノーム ON/OFF(発音は記録 fake で検証、再生中タイマーは fake で進める) |
-| エディタ(`EditorScreen`) | 音符追加(譜面タップ / 鍵盤タップ)/ 選択 / 削除 / 音価・♯ ツール / 曲名編集 / 試聴・練習する遷移 |
+| エディタ(`EditorScreen`) | 音符追加(譜面タップ / 鍵盤タップ)/ 選択 / 削除 / 音価・♯ ツール / 曲名編集 / 戻る・進む / 試聴(選択位置から・テンポ可変・譜面/鍵盤ハイライト)/ ツールバー表示切替 / 初期版へ戻す |
 | Semantics | 鍵盤・音符・主要ボタンに意味ラベルがある |
 
 widget test では animation を `pumpAndSettle` または明示 `pump` で進め、実時間 `sleep` を使わない。再生中の playhead 移動なども fake 化した時間で検証する。

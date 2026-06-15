@@ -69,16 +69,20 @@ class PracticeController extends ChangeNotifier {
   /// これだけを購読すれば再生中に毎フレーム再構築されない。
   ValueListenable<Set<String>> get litPitches => _litPitches;
 
-  /// 先頭から再生を開始する。空の旋律では何もしない。
-  void play() {
+  /// 再生を開始する。空の旋律では何もしない。
+  /// [fromBeat] を指定すると、その拍位置から再生する(指定位置からの試聴)。
+  void play({double fromBeat = 0}) {
     if (_isPlaying) return;
     _notes = piece.sortedNotes;
     if (_notes.isEmpty) return;
     _contentEndBeats = Piece.contentEndOf(_notes);
     _totalBeats = _contentEndBeats + tailBeats;
-    _elapsedBeats = 0;
-    _nextNote = 0;
-    _nextBeat = 0;
+    final start = fromBeat.clamp(0.0, _contentEndBeats);
+    _elapsedBeats = start;
+    // start 以降の最初の音符・メトロノーム拍から始める(前の音は鳴らさない)。
+    final firstNote = _notes.indexWhere((n) => n.beat >= start);
+    _nextNote = firstNote < 0 ? _notes.length : firstNote;
+    _nextBeat = start.ceil();
     _litNoteIndex = null;
     _litPitches.value = const {};
     _audio.init();

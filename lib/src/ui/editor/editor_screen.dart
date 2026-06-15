@@ -9,7 +9,8 @@ import '../widgets/piano_keyboard.dart';
 import '../widgets/score_view.dart';
 
 /// 楽譜エディタ(レールの「編集」タブ)。譜面/鍵盤タップで音符を追加・選択し、
-/// 音価/♯ を編集する。戻る/進む・末尾へ・初期版へ戻す・試聴(テンポ可変)を備える。
+/// 音価/♯ を編集する。戻る/進む・末尾へ・初期版へ戻す・試聴(テンポ可変・
+/// 選択位置から・鍵盤と譜面のハイライト)・ツールバーの表示切替を備える。
 ///
 /// 編集状態 [controller] はシェルが所有する(タブを切り替えても保持される)。
 class EditorScreen extends StatefulWidget {
@@ -35,8 +36,10 @@ class _EditorScreenState extends State<EditorScreen> {
 
   late final PracticeController _preview;
   late final TextEditingController _titleField;
+  late final Listenable _editAndPreview;
   final ScrollController _scoreScroll = ScrollController();
   double? _lastCaret;
+  bool _toolsVisible = true;
 
   EditorController get _editor => widget.controller;
 
@@ -56,6 +59,7 @@ class _EditorScreenState extends State<EditorScreen> {
       audioEngine: widget.audioEngine,
     );
     _titleField = TextEditingController(text: _editor.title);
+    _editAndPreview = Listenable.merge([_editor, _preview]);
     _editor.addListener(_keepCaretVisible);
   }
 
@@ -68,8 +72,7 @@ class _EditorScreenState extends State<EditorScreen> {
     super.dispose();
   }
 
-  /// 編集でキャレットが動いたら、譜面が見切れないよう自動スクロールする
-  /// (末尾への追加で新しい音符が見えるように)。キャレットが動いた時だけ実行する。
+  /// 編集でキャレットが動いたら、譜面が見切れないよう自動スクロールする。
   void _keepCaretVisible() {
     if (_editor.insertBeat == _lastCaret) return;
     _lastCaret = _editor.insertBeat;
@@ -77,15 +80,13 @@ class _EditorScreenState extends State<EditorScreen> {
       if (!mounted || !_scoreScroll.hasClients) return;
       final caretX = _geometry.xAtBeat(_editor.insertBeat);
       final pos = _scoreScroll.position;
-      final left = pos.pixels;
-      final right = left + pos.viewportDimension;
-      if (caretX < left + 40 || caretX > right - 40) {
-        final target = (caretX - pos.viewportDimension * 0.6).clamp(
-          0.0,
-          pos.maxScrollExtent,
-        );
+      if (caretX < pos.pixels + 40 ||
+          caretX > pos.pixels + pos.viewportDimension - 40) {
         _scoreScroll.animateTo(
-          target,
+          (caretX - pos.viewportDimension * 0.6).clamp(
+            0.0,
+            pos.maxScrollExtent,
+          ),
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
         );
@@ -104,7 +105,12 @@ class _EditorScreenState extends State<EditorScreen> {
       _preview.stop();
     } else {
       _preview.piece = _editor.currentPiece;
-      _preview.play();
+      // 音符を選択していればその位置から、無ければ先頭から試聴する。
+      final i = _editor.selectedIndex;
+      final from = (i != null && i < _editor.notes.length)
+          ? _editor.notes[i].beat
+          : 0.0;
+      _preview.play(fromBeat: from);
     }
   }
 
@@ -161,47 +167,60 @@ class _EditorScreenState extends State<EditorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListenableBuilder(
-        listenable: _editor,
-        builder: (context, _) {
-          return Column(
-            children: [
-              _titleBar(),
-              _toolbar(),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+      body: Column(
+        children: [
+          _titleBar(),
+          if (_toolsVisible)
+            ListenableBuilder(
+              listenable: _editor,
+              builder: (context, _) => _toolbar(),
+            ),
+          _toolsHandle(),
+          // 編集中はキャレット/選択、試聴中は再生ヘッド/該当音符をハイライトする。
+          ListenableBuilder(
+            listenable: _editAndPreview,
+            builder: (context, _) {
+              final previewing = _preview.isPlaying;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: ScoreView(
                   piece: _editor.currentPiece,
                   geometry: _geometry,
-                  selectedIndex: _editor.selectedIndex,
-                  caretBeat: _editor.insertBeat,
+                  selectedIndex: previewing ? null : _editor.selectedIndex,
+                  caretBeat: previewing ? null : _editor.insertBeat,
+                  litNoteIndex: previewing ? _preview.litNoteIndex : null,
+                  playheadX: previewing
+                      ? _geometry.xAtBeat(_preview.playheadBeats)
+                      : null,
                   snap: _editor.currentDuration,
                   height: 120,
                   scrollController: _scoreScroll,
-                  onAddAt: (beat, step) =>
-                      _editor.addNoteAtStep(beat: beat, step: step),
-                  onSelectNote: _editor.selectNote,
+                  // 試聴中は誤編集を避けるためタップを無効化する。
+                  onAddAt: previewing
+                      ? null
+                      : (beat, step) =>
+                            _editor.addNoteAtStep(beat: beat, step: step),
+                  onSelectNote: previewing ? null : _editor.selectNote,
                 ),
-              ),
-              const SizedBox(height: 6),
-              const Divider(height: 1),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) =>
-                      ValueListenableBuilder<Set<String>>(
-                        // 試聴中は鳴っている鍵を光らせる(鳴る音が変わった時だけ再構築)。
-                        valueListenable: _preview.litPitches,
-                        builder: (context, lit, _) => PianoKeyboard(
-                          onNotePressed: _onKeyboard,
-                          height: constraints.maxHeight,
-                          litPitches: lit,
-                        ),
-                      ),
-                ),
-              ),
-            ],
-          );
-        },
+              );
+            },
+          ),
+          const SizedBox(height: 6),
+          const Divider(height: 1),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) =>
+                  ValueListenableBuilder<Set<String>>(
+                    valueListenable: _preview.litPitches,
+                    builder: (context, lit, _) => PianoKeyboard(
+                      onNotePressed: _onKeyboard,
+                      height: constraints.maxHeight,
+                      litPitches: lit,
+                    ),
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -297,6 +316,29 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
+  /// ツールバーの表示/非表示を切り替える細い帯(タップ or 上下スワイプ)。
+  Widget _toolsHandle() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => setState(() => _toolsVisible = !_toolsVisible),
+      onVerticalDragEnd: (d) {
+        final v = d.primaryVelocity ?? 0;
+        if (v < -80 && _toolsVisible) setState(() => _toolsVisible = false);
+        if (v > 80 && !_toolsVisible) setState(() => _toolsVisible = true);
+      },
+      child: SizedBox(
+        height: 20,
+        child: Center(
+          child: Icon(
+            _toolsVisible ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+            size: 18,
+            color: EtudeColors.ivory3,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _toolbar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -349,10 +391,10 @@ class _EditorScreenState extends State<EditorScreen> {
             onPressed: _editor.clearAll,
           ),
           if (_editor.canReset)
-            OutlinedButton.icon(
+            IconButton(
+              tooltip: '最初に戻す',
+              icon: const Icon(Icons.settings_backup_restore),
               onPressed: _confirmReset,
-              icon: const Icon(Icons.restore, size: 18),
-              label: const Text('最初に戻す'),
             ),
           Text(
             '音符数: ${_editor.noteCount}',
