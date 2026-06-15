@@ -36,6 +36,7 @@ class _EditorScreenState extends State<EditorScreen> {
   late final PracticeController _preview;
   late final TextEditingController _titleField;
   final ScrollController _scoreScroll = ScrollController();
+  double? _lastCaret;
 
   EditorController get _editor => widget.controller;
 
@@ -68,10 +69,12 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   /// 編集でキャレットが動いたら、譜面が見切れないよう自動スクロールする
-  /// (末尾への追加で新しい音符が見えるように)。
+  /// (末尾への追加で新しい音符が見えるように)。キャレットが動いた時だけ実行する。
   void _keepCaretVisible() {
+    if (_editor.insertBeat == _lastCaret) return;
+    _lastCaret = _editor.insertBeat;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scoreScroll.hasClients) return;
+      if (!mounted || !_scoreScroll.hasClients) return;
       final caretX = _geometry.xAtBeat(_editor.insertBeat);
       final pos = _scoreScroll.position;
       final left = pos.pixels;
@@ -112,6 +115,26 @@ class _EditorScreenState extends State<EditorScreen> {
     );
   }
 
+  /// undo/redo/reset で曲名が変わったら入力欄へ反映する(タイピングには干渉しない)。
+  void _syncTitleField() {
+    final text = _editor.title;
+    if (_titleField.text == text) return;
+    _titleField.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+
+  void _undo() {
+    _editor.undo();
+    _syncTitleField();
+  }
+
+  void _redo() {
+    _editor.redo();
+    _syncTitleField();
+  }
+
   Future<void> _confirmReset() async {
     final ok = await showDialog<bool>(
       context: context,
@@ -130,10 +153,9 @@ class _EditorScreenState extends State<EditorScreen> {
         ],
       ),
     );
-    if (ok ?? false) {
-      _editor.resetToOriginal();
-      _titleField.text = _editor.title;
-    }
+    if (!mounted || !(ok ?? false)) return;
+    _editor.resetToOriginal();
+    _syncTitleField();
   }
 
   @override
@@ -298,28 +320,33 @@ class _EditorScreenState extends State<EditorScreen> {
           IconButton(
             tooltip: '戻る',
             icon: const Icon(Icons.undo),
-            onPressed: _editor.canUndo ? _editor.undo : null,
+            onPressed: _editor.canUndo ? _undo : null,
           ),
           IconButton(
             tooltip: '進む',
             icon: const Icon(Icons.redo),
-            onPressed: _editor.canRedo ? _editor.redo : null,
+            onPressed: _editor.canRedo ? _redo : null,
           ),
-          TextButton.icon(
+          IconButton(
+            tooltip: '末尾へ(末尾に追加しやすくする)',
+            icon: const Icon(Icons.last_page),
             onPressed: _editor.moveCaretToEnd,
-            icon: const Icon(Icons.last_page, size: 18),
-            label: const Text('末尾へ'),
           ),
-          TextButton(
+          IconButton(
+            tooltip: '選択を削除',
+            icon: const Icon(Icons.backspace_outlined),
             onPressed: _editor.deleteSelected,
-            child: const Text('選択を削除'),
           ),
-          TextButton(onPressed: _editor.clearAll, child: const Text('全消去')),
+          IconButton(
+            tooltip: '全消去',
+            icon: const Icon(Icons.delete_outline),
+            onPressed: _editor.clearAll,
+          ),
           if (_editor.canReset)
-            TextButton.icon(
+            IconButton(
+              tooltip: '最初の状態に戻す',
+              icon: const Icon(Icons.restore),
               onPressed: _confirmReset,
-              icon: const Icon(Icons.restore, size: 18),
-              label: const Text('元に戻す'),
             ),
           Text(
             '音符数: ${_editor.noteCount}',

@@ -235,6 +235,23 @@ void main() {
       c.resetToOriginal();
       expect(c.noteCount, 0);
     });
+
+    test('reset → undo で曲名と音符が編集後の状態へ戻る', () {
+      final original = twoBeatMelody();
+      final c = EditorController(
+        piece: original.copyWith(title: '編集後'),
+        original: original,
+      );
+      c.addNoteFromKeyboard('G4'); // 編集後: 3 音符・曲名「編集後」
+
+      c.resetToOriginal(); // 初期版: 2 音符・元の曲名
+      expect(c.title, original.title);
+      expect(c.noteCount, 2);
+
+      c.undo(); // reset を取り消す → 編集後に戻る(曲名も音符も)
+      expect(c.title, '編集後');
+      expect(c.noteCount, 3);
+    });
   });
 
   test('変更で listener に通知する', () {

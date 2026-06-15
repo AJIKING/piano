@@ -3,6 +3,9 @@ import 'package:flutter/foundation.dart';
 import '../domain/score/note.dart';
 import '../domain/score/piece.dart';
 
+/// 戻る/進む用の状態スナップショット(曲名＋音符)。
+typedef _Snapshot = ({String title, List<Note> notes});
+
 /// 楽譜エディタの編集状態。音符の追加・選択・削除、音価/♯ ツール、曲名、
 /// 戻る/進む(undo/redo)、初期楽譜へのリセットを扱う。
 /// 旋律は常に `beat` 昇順に保たれる。pure な編集ロジックなので unit test で守る。
@@ -27,10 +30,10 @@ class EditorController extends ChangeNotifier {
   int? _selectedIndex;
   double _insertBeat = 0;
 
-  // 戻る/進む用の音符スナップショット。
+  // 戻る/進む用のスナップショット(曲名＋音符)。
   static const int _historyLimit = 50;
-  final List<List<Note>> _undo = [];
-  final List<List<Note>> _redo = [];
+  final List<_Snapshot> _undo = [];
+  final List<_Snapshot> _redo = [];
 
   String get title => _title;
 
@@ -57,25 +60,30 @@ class EditorController extends ChangeNotifier {
 
   // ---- 内部ヘルパ ----
 
-  /// 音符を変更する操作の前に呼び、現在の状態を undo へ積む。
+  _Snapshot _snapshot() => (title: _title, notes: List<Note>.of(_notes));
+
+  /// 状態を変更する操作の前に呼び、現在の状態を undo へ積む。
   void _pushUndo() {
-    _undo.add(List<Note>.of(_notes));
+    _undo.add(_snapshot());
     if (_undo.length > _historyLimit) _undo.removeAt(0);
     _redo.clear();
+  }
+
+  /// スナップショットを適用する(曲名・音符を復元し、選択/キャレットをリセット)。
+  void _apply(_Snapshot snapshot) {
+    _title = snapshot.title;
+    _notes
+      ..clear()
+      ..addAll(snapshot.notes)
+      ..sort(Piece.compareNotes);
+    _selectedIndex = null;
+    _insertBeat = contentEnd;
   }
 
   /// 正準順に整列し直し、[note] を選択状態として再特定する。
   void _sortAndSelect(Note note) {
     _notes.sort(Piece.compareNotes);
     _selectedIndex = _notes.indexOf(note);
-  }
-
-  void _replaceNotes(List<Note> next) {
-    _notes
-      ..clear()
-      ..addAll(next);
-    _selectedIndex = null;
-    _insertBeat = contentEnd;
   }
 
   // ---- 操作 ----
@@ -188,24 +196,23 @@ class EditorController extends ChangeNotifier {
     final original = _original;
     if (original == null) return;
     _pushUndo();
-    _replaceNotes(List<Note>.of(original.notes)..sort(Piece.compareNotes));
-    _title = original.title;
+    _apply((title: original.title, notes: List<Note>.of(original.notes)));
     notifyListeners();
   }
 
-  /// 直前の音符変更を取り消す。
+  /// 直前の変更を取り消す(曲名・音符)。
   void undo() {
     if (_undo.isEmpty) return;
-    _redo.add(List<Note>.of(_notes));
-    _replaceNotes(_undo.removeLast());
+    _redo.add(_snapshot());
+    _apply(_undo.removeLast());
     notifyListeners();
   }
 
   /// 取り消した変更をやり直す。
   void redo() {
     if (_redo.isEmpty) return;
-    _undo.add(List<Note>.of(_notes));
-    _replaceNotes(_redo.removeLast());
+    _undo.add(_snapshot());
+    _apply(_redo.removeLast());
     notifyListeners();
   }
 }

@@ -71,10 +71,11 @@ class ScoreView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final contentEnd = piece.contentEnd;
-    final width = geometry.xAtBeat(contentEnd) + 28;
+    final rawWidth = geometry.xAtBeat(contentEnd) + 28;
+    final width = rawWidth < 280 ? 280.0 : rawWidth;
     final interactive = onAddAt != null || onSelectNote != null;
     Widget paint = CustomPaint(
-      size: Size(width < 280 ? 280 : width, height),
+      size: Size(width, height),
       painter: _ScorePainter(
         piece: piece,
         geometry: geometry,
@@ -278,7 +279,7 @@ class _ScorePainter extends CustomPainter {
     if (selected) {
       canvas.drawCircle(
         Offset(x, y),
-        10,
+        8.5,
         Paint()
           ..color = _selected
           ..style = PaintingStyle.stroke
