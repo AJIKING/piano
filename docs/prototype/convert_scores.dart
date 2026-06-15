@@ -13,8 +13,12 @@ import 'dart:io';
 const allowed = <double>[0.25, 0.5, 1, 1.5, 2, 3];
 const sharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+// ピアノ域(A0=21 〜 C8=108)。これ以外(MIDI 由来の異常音・サブ音)はスキップする。
+const int loMidi = 21, hiMidi = 108;
+
 int midiOf(String pitch) {
-  final m = RegExp(r'^([A-G])(#?)([0-9])$').firstMatch(pitch)!;
+  final m = RegExp(r'^([A-G])(#?)(-?\d+)$').firstMatch(pitch);
+  if (m == null) return -1; // 想定外表記はスキップ対象。
   const base = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11};
   final semi = base[m.group(1)]! + (m.group(2) == '#' ? 1 : 0);
   final oct = int.parse(m.group(3)!);
@@ -68,11 +72,26 @@ void main() {
   final data = jsonDecode(raw) as Map<String, Object?>;
   final pieces = (data['pieces'] as List).cast<Map<String, Object?>>();
 
+  // (giftId, 変数名, 単旋律抽出しきい値(MIDI; null=全音保持), 拍子(整数), 既定BPM)
   final cfgs = [
-    Cfg('fuer_elise', '_furElise', 60, 3, 76), // C4 以上=右手旋律
-    Cfg('gymnopedie_1', '_gymnopedie', 67, 3, 66), // G4 以上=旋律(内声除外)
-    Cfg('bach_prelude_c', '_bwv846', null, 4, 72), // 分散和音そのまま
-    Cfg('chopin_prelude_e_minor', '_preludeEMinor', 68, 4, 56), // G#4 以上=旋律
+    Cfg('fuer_elise', '_furElise', 60, 3, 76),
+    Cfg('minuet_g', '_minuet', 60, 3, 120),
+    Cfg('mozart_k545_1', '_sonataFacile', 60, 4, 120),
+    Cfg('gymnopedie_1', '_gymnopedie', 67, 3, 66),
+    Cfg('ode_to_joy', '_odeToJoy', 60, 4, 100),
+    Cfg('burgmuller_arabesque', '_burgmullerArabesque', 60, 2, 108),
+    Cfg('beethoven_moonlight_1', '_moonlight1', 67, 4, 52),
+    Cfg('chopin_nocturne_9_2', '_nocturne', 62, 4, 56),
+    Cfg('chopin_prelude_e_minor', '_preludeEMinor', 68, 4, 56),
+    Cfg('debussy_clair_de_lune', '_clairDeLune', 60, 3, 56),
+    Cfg('debussy_arabesque_1', '_debussyArabesque', 60, 4, 92),
+    Cfg('pachelbel_canon', '_canon', 60, 4, 80),
+    Cfg('bach_prelude_c', '_bwv846', null, 4, 72),
+    Cfg('schubert_ave_maria', '_aveMaria', 64, 4, 56),
+    Cfg('joplin_entertainer', '_entertainer', 64, 2, 90),
+    Cfg('chopin_fantaisie_impromptu', '_fantaisieImpromptu', 64, 4, 80),
+    Cfg('chopin_minute_waltz', '_minuteWaltz', 64, 3, 126),
+    Cfg('beethoven_moonlight_3', '_moonlight3', 60, 4, 120),
   ];
 
   for (final cfg in cfgs) {
@@ -83,6 +102,7 @@ void main() {
     final byOnset = <double, ({int midi, double dur})>{};
     for (final n in notes) {
       final midi = midiOf(n['pitch'] as String);
+      if (midi < loMidi || midi > hiMidi) continue; // 域外/異常音はスキップ。
       if (cfg.thresholdMidi != null && midi < cfg.thresholdMidi!) continue;
       final onset = snapGrid((n['beat'] as num).toDouble(), 0.25);
       final dur = snapDur((n['duration'] as num).toDouble());
@@ -141,6 +161,7 @@ void main() {
       final onset = snapGrid((n['beat'] as num).toDouble(), 0.25);
       if (onset >= targetBeats) continue;
       final midi = midiOf(n['pitch'] as String);
+      if (midi < loMidi || midi > hiMidi) continue; // 域外/異常音はスキップ。
       final dur = snapDur((n['duration'] as num).toDouble());
       if (seen.add('$onset:$midi')) {
         full.add((beat: onset, midi: midi, dur: dur));

@@ -14,8 +14,8 @@ void main() {
     expect(repo.samplePieces(), isNotEmpty);
   });
 
-  test('既定シードは 20 曲', () {
-    expect(allPieces(), hasLength(20));
+  test('既定シードは 18 曲', () {
+    expect(allPieces(), hasLength(18));
   });
 
   test('拍子・既定テンポが妥当', () {

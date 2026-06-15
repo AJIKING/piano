@@ -33,7 +33,7 @@ def note_name(n, octave_offset=0):
     return f"{SHARP[n % 12]}{octave}"
 
 def convert(path, channel=None, octave_offset=0):
-    mid = mido.MidiFile(path)
+    mid = mido.MidiFile(path, clip=True)
     tpb = mid.ticks_per_beat
     bpm = 120.0
     numerator, denominator = 4, 4

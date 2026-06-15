@@ -1,67 +1,59 @@
-# デフォルト楽譜データ 一式（フル尺対応版）
+# デフォルト楽譜データ（リクエスト16曲対応・最終版）
 
-ピアノアプリ用のデフォルト楽譜データと、曲を追加するための変換ツールです。
-収録曲のうち4曲は **Mutopia Project のパブリックドメイン楽譜から実データを生成** した
-フル尺（または曲の自然な区切りまで）の本物です。
+リクエスト16曲のうち **14曲を本物のフル尺データで収録**しました（Mutopia ProjectのPDソースから生成）。
+未収録は2曲のみです。
 
-## 収録7曲
+## bundled_scores.json 収録曲（全19曲・計23,281音）
 
-| id | 曲 | 出典 | 音符数 | 長さ | featured |
-|---|---|---|---|---|---|
-| `twinkle` | きらきら星 | 手打ち | 42 | 12小節 | |
-| `ode_to_joy` | 歓喜の歌（第九より） | 手打ち | 30 | 8小節 | |
-| `minuet_g` | メヌエット ト長調 | 手打ち | 16 | 4小節 | |
-| `gymnopedie_1` | ジムノペディ 第1番 | Mutopia(全曲) | 282 | 47小節 | ★ |
-| `bach_prelude_c` | 前奏曲 ハ長調 BWV846 | Mutopia(全曲) | 549 | 35小節 | |
-| `chopin_prelude_e_minor` | 前奏曲 ホ短調 Op.28-4 | Mutopia(全曲) | 600 | 25小節 | |
-| `fuer_elise` | エリーゼのために | Mutopia(全曲ABACA) | 905 | — | ★ |
+### リクエストから収録できた13曲
+| 曲 | 音符 | feat |
+|---|---|---|
+| ソナタ K.545 第1楽章 | 1288 | |
+| ノクターン Op.9-2 | 1243 | |
+| 月の光 | 1494 | ★ |
+| アラベスク第1番（ドビュッシー） | 1458 | |
+| ジ・エンターテイナー | 2621 | |
+| 幻想即興曲 Op.66 | 3014 | |
+| カノン（パッヘルベル） | 138 | |
+| 月光ソナタ 第1楽章 | 1144 | ★ |
+| 月光ソナタ 第3楽章 | 4469 | |
+| アヴェ・マリア（シューベルト） | 2335 | |
+| 小犬のワルツ Op.64-1 | 1370 | |
+| アラベスク（ブルクミュラー） | 283 | |
+| メヌエット ト長調 | 16 | |
+| 歓喜の歌 | 30 | |
 
-- 上3曲は初級用の短い主旋律アレンジ（音高は正確、リズムは簡略）。
-- 下4曲はMutopiaのLilyPondソースからMIDIを生成→JSON化した本物のフル尺。
-- 強弱が楽譜に無い曲（Bach・エリーゼ）は、拍頭88・拍76・細分68で軽くアクセントを付与済み。
-  Satie・Chopinは元の強弱がそのまま入っているので、7層サンプルの表情が出ます。
+### 前回からの継続収録（リクエスト外・5曲）
+前奏曲ハ長調BWV846 / 前奏曲ホ短調Op.28-4 / エリーゼのために★ / ジムノペディ第1番★ / きらきら星
+
+個別の.jsonは individual_scores.zip にも入れてあります。
+
+## 未収録の2曲と理由
+
+| 曲 | 状況 |
+|---|---|
+| 朝（グリーグ Morning Mood） | **Mutopia未収録**。IMSLP/MuseScoreはこの作業環境から取得不可 |
+| 愛の夢 第3番（リスト） | **Mutopia未収録**（"制作中"記載）。同上 |
+
+この2曲は、IMSLP（ブラウザで簡単にDL可）等のPD .mid を渡してもらえれば即JSON化できます。
+
+## 残り2曲を足す手順（.mid → JSON）
+
+1. IMSLP等でPDの .mid を入手（曲名で検索、ライセンス要確認）
+2. `python3 midi_to_score.py 曲.mid --id <id> --title "<曲名>" --composer "<作曲者>" -o out.json`
+3. out.json を bundled_scores.json の `pieces` に追加
 
 ## データ仕様
-
 ```
 Piece { id, title, composer, beatsPerMeasure, defaultBpm, featured, isUserCreated:false, notes:[Note] }
-Note  { pitch:"C4"/"F#5", beat, duration, velocity(0-127) }
+Note  { pitch:"C4"/"F#5", beat, duration, velocity }
 ```
+- beat/duration は4分音符=1拍の絶対拍。3/8・6/8・9/8等は beatsPerMeasure が小数（1.5/4.5等）になりますが、
+  再生タイミングは全曲4分音符基準で統一。
+- 強弱無指定の曲は拍頭アクセント(88/76/68)を自動付与、元の強弱がある曲はそれを保持。
+- 注：アヴェ・マリアは原譜のテンポ表記でdefaultBpm=24（大きな拍の刻み）。速く感じる/遅く感じる場合は
+  defaultBpmを調整してください。カノンはMutopiaの簡易版のため音符数控えめです。月光第3楽章(Presto)は原MIDIにテンポ指定が無くdefaultBpm=60になっているので、速く演奏したい場合は上げてください。
 
-- `beat`/`duration` は **4分音符 = 1拍** の絶対拍。`defaultBpm` も4分音符基準。
-- `pitch` はシャープ表記、MIDI 60 = "C4"。
-- 補足：3/8拍子の曲（エリーゼ）は `beatsPerMeasure` が **1.5**（4分音符換算）。
-  小節グルーピング用の値で、再生タイミング自体は他曲と同じ4分音符基準なので問題ありません。
-
-## 曲を追加する（実際に使った手順）
-
-この一式は以下のパイプラインで作りました。同じ手順で20曲まで増やせます。
-
-```bash
-# 1) MutopiaのGitHubから .ly ソースを取得（曲ごとのパスはサイトで確認）
-base=https://raw.githubusercontent.com/MutopiaProject/MutopiaProject/master/ftp
-curl -o piece.ly "$base/ChopinFF/O28/Chop-28-7/Chop-28-7.ly"
-
-# 2) 古い構文を現行LilyPondへ更新し、MIDIを生成
-convert-ly -e piece.ly
-lilypond -o piece piece.ly        # .ly内に \midi {} があればMIDIが出る
-
-# 3) 本ツールでアプリのJSONスキーマへ変換
-python3 midi_to_score.py piece.midi \
-    --id chopin_28_7 --title "前奏曲 イ長調 Op.28-7" --composer "F. Chopin" -o out.json
-```
-
-出力された各曲JSONを `bundled_scores.json` の `pieces` 配列に足すだけです。
-全曲が長すぎる場合は、自然な区切りの拍位置で `notes` を切ればOK（小節頭＝
-`beat % beatsPerMeasure == 0` の位置で切ると綺麗）。
-
-### ライセンス
-Mutopia Project の楽譜はパブリックドメイン版に基づき、CC（Public Domain / CC-BY-SA）で
-配布されています。今回使った4曲はいずれもソース内に Public Domain / CC 表記あり。
-商用アプリに載せる場合、CC-BY-SAのものは帰属表示（typesetterのクレジット）を忘れずに。
-各 .ly の `copyright` / `maintainer` 欄を控えておいてください。
-
-### 変換ツールのオプション
-- `--channel N` … 右手だけ等、特定MIDIチャンネルのみ抽出
-- `--octave-offset -1` … 音源が60をC3扱いする場合の補正
-- `--bpm N` … 検出テンポを上書き
+## ライセンス
+Mutopiaの楽譜はPD/CC（多くはPublic DomainまたはCC-BY-SA）。商用配布時、CC-BY-SAのものは
+typesetterのクレジット表示が必要。各曲の出典は元.lyのcopyright/maintainer欄で確認できます。
