@@ -98,7 +98,14 @@ class _PracticeScreenState extends State<PracticeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.piece.title)),
+      appBar: AppBar(
+        // 横画面で縦を節約するため、曲名はやや小さめ・低めのバーに。
+        toolbarHeight: 48,
+        title: Text(
+          widget.piece.title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ),
       body: Column(
         children: [
           // 譜面と再生コントロールは毎フレーム(再生ヘッド)更新する。
