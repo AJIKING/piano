@@ -11,6 +11,8 @@ class Piece {
     this.masteryPercent = 0,
     this.lastPracticedAt,
     this.isUserCreated = false,
+    this.beatsPerMeasure = 3,
+    this.defaultBpm = 72,
   });
 
   final String id;
@@ -22,6 +24,12 @@ class Piece {
 
   /// 難易度(★ 0–5)。
   final int stars;
+
+  /// 拍子の 1 小節あたりの拍数(小節線・メトロノームの強拍に使う)。
+  final int beatsPerMeasure;
+
+  /// 既定テンポ(BPM)。練習・試聴の初期値に使う。
+  final int defaultBpm;
 
   /// 習得度(0–100)。
   final int masteryPercent;
@@ -66,6 +74,8 @@ class Piece {
     int? masteryPercent,
     DateTime? lastPracticedAt,
     bool? isUserCreated,
+    int? beatsPerMeasure,
+    int? defaultBpm,
   }) => Piece(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -75,6 +85,8 @@ class Piece {
     masteryPercent: masteryPercent ?? this.masteryPercent,
     lastPracticedAt: lastPracticedAt ?? this.lastPracticedAt,
     isUserCreated: isUserCreated ?? this.isUserCreated,
+    beatsPerMeasure: beatsPerMeasure ?? this.beatsPerMeasure,
+    defaultBpm: defaultBpm ?? this.defaultBpm,
   );
 
   Map<String, Object?> toJson() => {
@@ -85,6 +97,8 @@ class Piece {
     'masteryPercent': masteryPercent,
     'lastPracticedAt': lastPracticedAt?.toIso8601String(),
     'isUserCreated': isUserCreated,
+    'beatsPerMeasure': beatsPerMeasure,
+    'defaultBpm': defaultBpm,
     'notes': notes.map((n) => n.toJson()).toList(),
   };
 
@@ -101,6 +115,8 @@ class Piece {
       masteryPercent: (json['masteryPercent'] as num?)?.toInt() ?? 0,
       lastPracticedAt: rawDate == null ? null : DateTime.parse(rawDate),
       isUserCreated: json['isUserCreated'] as bool? ?? false,
+      beatsPerMeasure: (json['beatsPerMeasure'] as num?)?.toInt() ?? 3,
+      defaultBpm: (json['defaultBpm'] as num?)?.toInt() ?? 72,
       notes: rawNotes,
     );
   }

@@ -17,7 +17,6 @@ class ScoreView extends StatelessWidget {
     this.caretBeat,
     this.playheadX,
     this.height = 96,
-    this.beatsPerMeasure = 3,
     this.onAddAt,
     this.onSelectNote,
     this.snap = 1,
@@ -43,7 +42,6 @@ class ScoreView extends StatelessWidget {
   /// 再生ヘッドの x(再生中のみ)。
   final double? playheadX;
   final double height;
-  final int beatsPerMeasure;
 
   /// 譜面の空き領域タップ。スナップ済みの拍と五線位置(step)を渡す(エディタ用)。
   final void Function(double beat, int step)? onAddAt;
@@ -85,7 +83,6 @@ class ScoreView extends StatelessWidget {
         selectedIndex: selectedIndex,
         caretBeat: caretBeat,
         playheadX: playheadX,
-        beatsPerMeasure: beatsPerMeasure,
       ),
     );
     if (interactive) {
@@ -114,7 +111,6 @@ class _ScorePainter extends CustomPainter {
     required this.selectedIndex,
     required this.caretBeat,
     required this.playheadX,
-    required this.beatsPerMeasure,
   });
 
   final Piece piece;
@@ -123,7 +119,6 @@ class _ScorePainter extends CustomPainter {
   final int? selectedIndex;
   final double? caretBeat;
   final double? playheadX;
-  final int beatsPerMeasure;
 
   static const _paper = Color(0xFFF4EDDC);
   static const _staffLine = Color(0xFF9D8E6F);
@@ -150,12 +145,13 @@ class _ScorePainter extends CustomPainter {
       canvas.drawLine(Offset(14, y), Offset(size.width - 8, y), linePaint);
     }
 
-    // 小節線(3 拍ごと)。
+    // 小節線(拍子の 1 小節ぶんごと)。
     final barPaint = Paint()
       ..color = _bar
       ..strokeWidth = 1;
     final contentEnd = piece.contentEnd;
-    for (var b = beatsPerMeasure; b < contentEnd; b += beatsPerMeasure) {
+    final perMeasure = piece.beatsPerMeasure;
+    for (var b = perMeasure; b < contentEnd; b += perMeasure) {
       final x = g.xAtBeat(b.toDouble()) - 13;
       canvas.drawLine(
         Offset(x, g.topY),

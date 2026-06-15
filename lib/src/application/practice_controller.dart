@@ -26,9 +26,6 @@ class PracticeController extends ChangeNotifier {
   static const double minBpm = 40;
   static const double maxBpm = 160;
 
-  /// 拍子の強拍周期(3/4 拍子)。
-  static const int beatsPerMeasure = 3;
-
   /// 末尾に付ける余韻(拍)。
   static const double tailBeats = 0.3;
 
@@ -150,7 +147,7 @@ class PracticeController extends ChangeNotifier {
       while (_nextBeat < lastBeat && _nextBeat <= _elapsedBeats) {
         // クリックは AudioEngine の発音で代用(強拍/弱拍で音高を変える)。
         _audio.playNote(
-          _nextBeat % beatsPerMeasure == 0 ? 'C3' : 'G2',
+          _nextBeat % piece.beatsPerMeasure == 0 ? 'C3' : 'G2',
           sustain: const Duration(milliseconds: 50),
         );
         _nextBeat++;

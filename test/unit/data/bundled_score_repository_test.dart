@@ -14,6 +14,30 @@ void main() {
     expect(repo.samplePieces(), isNotEmpty);
   });
 
+  test('既定シードは 10 曲', () {
+    expect(allPieces(), hasLength(10));
+  });
+
+  test('拍子・既定テンポが妥当', () {
+    for (final p in allPieces()) {
+      expect(p.beatsPerMeasure, inInclusiveRange(2, 4), reason: p.id);
+      expect(p.defaultBpm, inInclusiveRange(40, 160), reason: p.id);
+    }
+  });
+
+  test('音域は鍵盤(C3–B5)に収まる', () {
+    for (final p in allPieces()) {
+      for (final n in p.notes) {
+        final midi = Note.midiOf(n.pitch);
+        expect(
+          midi,
+          inInclusiveRange(Note.midiOf('C3'), Note.midiOf('B5')),
+          reason: '${p.id}: ${n.pitch}',
+        );
+      }
+    }
+  });
+
   test('id は全曲で一意', () {
     final ids = allPieces().map((p) => p.id).toList();
     expect(ids.toSet().length, ids.length);

@@ -58,6 +58,7 @@ class _EditorScreenState extends State<EditorScreen> {
     _preview = PracticeController(
       piece: _editor.currentPiece,
       audioEngine: widget.audioEngine,
+      bpm: _editor.currentPiece.defaultBpm.toDouble(),
     );
     _titleField = TextEditingController(text: _editor.title);
     _editAndPreview = Listenable.merge([_editor, _preview]);

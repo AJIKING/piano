@@ -43,6 +43,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
     _controller = PracticeController(
       piece: widget.piece,
       audioEngine: widget.audioEngine,
+      bpm: widget.piece.defaultBpm.toDouble(),
       onCompleted: widget.onCompleted,
     );
     // 鳴る音が変わるたびに(=毎フレームではなく)再生ヘッドを追従させる。
