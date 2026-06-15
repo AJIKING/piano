@@ -155,16 +155,29 @@ void main() {
     final piece = pieces.firstWhere((p) => p['id'] == cfg.id);
     final notes = (piece['notes'] as List).cast<Map<String, Object?>>();
     final targetBeats = (cfg.bpm.toDouble() / cfg.bpMeas).floor() * cfg.bpMeas;
-    final seen = <String>{};
-    final full = <({double beat, int midi, double dur})>[];
+    // 参考にしやすいよう、1拍ごとに最高音(メロディ)＋最低音(バス)だけ残して
+    // 内声・速い分散和音を間引く(骨組み化)。
+    final cellHi = <int, ({int midi, double dur})>{};
+    final cellLo = <int, ({int midi, double dur})>{};
     for (final n in notes) {
       final onset = snapGrid((n['beat'] as num).toDouble(), 0.25);
       if (onset >= targetBeats) continue;
       final midi = midiOf(n['pitch'] as String);
       if (midi < loMidi || midi > hiMidi) continue; // 域外/異常音はスキップ。
       final dur = snapDur((n['duration'] as num).toDouble());
-      if (seen.add('$onset:$midi')) {
-        full.add((beat: onset, midi: midi, dur: dur));
+      final cell = onset.floor();
+      final hi = cellHi[cell];
+      if (hi == null || midi > hi.midi) cellHi[cell] = (midi: midi, dur: dur);
+      final lo = cellLo[cell];
+      if (lo == null || midi < lo.midi) cellLo[cell] = (midi: midi, dur: dur);
+    }
+    final full = <({double beat, int midi, double dur})>[];
+    for (final cell in cellHi.keys) {
+      final hi = cellHi[cell]!;
+      final lo = cellLo[cell]!;
+      full.add((beat: cell.toDouble(), midi: hi.midi, dur: hi.dur));
+      if (lo.midi != hi.midi) {
+        full.add((beat: cell.toDouble(), midi: lo.midi, dur: lo.dur));
       }
     }
     full.sort((a, b) {
