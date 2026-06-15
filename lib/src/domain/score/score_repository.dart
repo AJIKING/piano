@@ -3,10 +3,10 @@ import 'piece.dart';
 /// 同梱の収録曲を供給する境界。テストでは最小 fixture に差し替える。
 /// 実装は data 層(`BundledScoreRepository`)。供給方式は ADR 0003。
 abstract interface class ScoreRepository {
-  /// 「今練習中」として最初に提示する既定曲。
+  /// 起動時に編集タブの既定として開く代表曲。
   Piece featured();
 
-  /// 収録曲のコレクション(マイ楽譜の初期一覧。featured は含めない)。
+  /// featured を除く収録曲のコレクション(一覧では featured と結合して表示)。
   List<Piece> samplePieces();
 
   /// 収録曲の初期版を id で返す(編集前へ戻す用)。該当しなければ null。
