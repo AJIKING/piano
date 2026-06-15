@@ -195,23 +195,48 @@ void main() {
       });
     });
 
-    test('litPitch は鳴っている音高を返し、停止で null', () {
+    test('litPitches は鳴っている音高の集合を返し、停止で空', () {
       fakeAsync((async) {
         final c = PracticeController(
           piece: twoBeatMelody(),
           audioEngine: RecordingAudioEngine(),
           bpm: 60,
         );
-        expect(c.litPitch, isNull);
+        expect(c.litPitches.value, isEmpty);
 
         c.play();
         async.elapse(const Duration(milliseconds: 100)); // C4
-        expect(c.litPitch, 'C4');
+        expect(c.litPitches.value, {'C4'});
         async.elapse(const Duration(milliseconds: 1000)); // E4
-        expect(c.litPitch, 'E4');
+        expect(c.litPitches.value, {'E4'});
 
         c.stop();
-        expect(c.litPitch, isNull);
+        expect(c.litPitches.value, isEmpty);
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
+    test('和音は複数鍵ぶんの litPitches を返す', () {
+      fakeAsync((async) {
+        final c = PracticeController(
+          piece: Piece(
+            id: 'p',
+            title: 't',
+            composer: 'c',
+            notes: const [
+              Note(pitch: 'C4', beat: 0, duration: 1),
+              Note(pitch: 'E4', beat: 0, duration: 1),
+              Note(pitch: 'G4', beat: 0, duration: 1),
+            ],
+          ),
+          audioEngine: RecordingAudioEngine(),
+          bpm: 60,
+        );
+        c.play();
+        async.elapse(const Duration(milliseconds: 100));
+        expect(c.litPitches.value, {'C4', 'E4', 'G4'});
+        c.stop();
         async.flushTimers();
         c.dispose();
       });

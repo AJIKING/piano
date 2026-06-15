@@ -187,18 +187,16 @@ class _EditorScreenState extends State<EditorScreen> {
               const Divider(height: 1),
               Expanded(
                 child: LayoutBuilder(
-                  builder: (context, constraints) => ListenableBuilder(
-                    listenable: _preview,
-                    builder: (context, _) => PianoKeyboard(
-                      onNotePressed: _onKeyboard,
-                      height: constraints.maxHeight,
-                      // 試聴中は鳴っている鍵を光らせる。
-                      litPitches:
-                          _preview.isPlaying && _preview.litPitch != null
-                          ? {_preview.litPitch!}
-                          : const {},
-                    ),
-                  ),
+                  builder: (context, constraints) =>
+                      ValueListenableBuilder<Set<String>>(
+                        // 試聴中は鳴っている鍵を光らせる(鳴る音が変わった時だけ再構築)。
+                        valueListenable: _preview.litPitches,
+                        builder: (context, lit, _) => PianoKeyboard(
+                          onNotePressed: _onKeyboard,
+                          height: constraints.maxHeight,
+                          litPitches: lit,
+                        ),
+                      ),
                 ),
               ),
             ],

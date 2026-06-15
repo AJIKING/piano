@@ -38,4 +38,32 @@ void main() {
     // C 鍵は音名ラベルの Text も持つため、ラベルのみの D3 で検証する。
     expect(find.bySemanticsLabel('D3'), findsOneWidget);
   });
+
+  testWidgets('litPitches で該当鍵が点灯色になり、範囲外は無視される', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PianoKeyboard(
+            onNotePressed: (_) {},
+            litPitches: const {'C3', 'C9'}, // C9 は表示範囲外 → 無視される
+          ),
+        ),
+      ),
+    );
+
+    Color firstColor(String pitch) {
+      final box = tester.widget<Container>(
+        find.descendant(
+          of: find.byKey(ValueKey('key-$pitch')),
+          matching: find.byType(Container),
+        ),
+      );
+      return ((box.decoration! as BoxDecoration).gradient! as LinearGradient)
+          .colors
+          .first;
+    }
+
+    expect(firstColor('C3'), const Color(0xFFF3DCA4)); // 点灯色
+    expect(firstColor('D3'), const Color(0xFFF7F1E4)); // 通常色
+  });
 }

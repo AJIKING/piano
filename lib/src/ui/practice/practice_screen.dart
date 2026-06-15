@@ -65,39 +65,43 @@ class _PracticeScreenState extends State<PracticeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.piece.title)),
-      body: ListenableBuilder(
-        listenable: _controller,
-        builder: (context, _) {
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: ScoreView(
-                  piece: widget.piece,
-                  geometry: _geometry,
-                  litNoteIndex: _controller.litNoteIndex,
-                  playheadX: _playheadX(),
-                ),
-              ),
-              _controls(),
-              const Divider(height: 1),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: PianoKeyboard(
-                    onNotePressed: _onKey,
-                    height: 160,
-                    // 再生中は鳴っている鍵を光らせる。
-                    litPitches:
-                        _controller.isPlaying && _controller.litPitch != null
-                        ? {_controller.litPitch!}
-                        : const {},
+      body: Column(
+        children: [
+          // 譜面と再生コントロールは毎フレーム(再生ヘッド)更新する。
+          ListenableBuilder(
+            listenable: _controller,
+            builder: (context, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: ScoreView(
+                    piece: widget.piece,
+                    geometry: _geometry,
+                    litNoteIndex: _controller.litNoteIndex,
+                    playheadX: _playheadX(),
                   ),
                 ),
+                _controls(),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          // 鍵盤は「鳴る音が変わった時」だけ再構築する(毎フレーム再構築を避ける)。
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: ValueListenableBuilder<Set<String>>(
+                valueListenable: _controller.litPitches,
+                builder: (context, lit, _) => PianoKeyboard(
+                  onNotePressed: _onKey,
+                  height: 160,
+                  litPitches: lit,
+                ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }

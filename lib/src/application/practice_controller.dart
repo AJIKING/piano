@@ -44,6 +44,7 @@ class PracticeController extends ChangeNotifier {
   bool _metronomeOn = false;
   bool _isPlaying = false;
   int? _litNoteIndex;
+  final ValueNotifier<Set<String>> _litPitches = ValueNotifier(const {});
 
   Timer? _timer;
   List<Note> _notes = const [];
@@ -63,11 +64,10 @@ class PracticeController extends ChangeNotifier {
   /// いま鳴っている音符のインデックス([piece] の正準順)。譜面ハイライト用。
   int? get litNoteIndex => _litNoteIndex;
 
-  /// いま鳴っている音高(無ければ null)。鍵盤ハイライト用。
-  String? get litPitch {
-    final i = _litNoteIndex;
-    return (i == null || i >= _notes.length) ? null : _notes[i].pitch;
-  }
+  /// いま鳴っている音高の集合(和音は複数)。鍵盤ハイライト用。
+  /// 毎フレームではなく「鳴る音が変わった時だけ」通知するので、鍵盤は
+  /// これだけを購読すれば再生中に毎フレーム再構築されない。
+  ValueListenable<Set<String>> get litPitches => _litPitches;
 
   /// 先頭から再生を開始する。空の旋律では何もしない。
   void play() {
@@ -79,6 +79,8 @@ class PracticeController extends ChangeNotifier {
     _elapsedBeats = 0;
     _nextNote = 0;
     _nextBeat = 0;
+    _litNoteIndex = null;
+    _litPitches.value = const {};
     _audio.init();
     _isPlaying = true;
     _timer = Timer.periodic(tickInterval, (_) => _onTick());
@@ -93,6 +95,7 @@ class PracticeController extends ChangeNotifier {
     _isPlaying = false;
     _elapsedBeats = 0;
     _litNoteIndex = null;
+    _litPitches.value = const {};
     notifyListeners();
   }
 
@@ -115,6 +118,7 @@ class PracticeController extends ChangeNotifier {
     _elapsedBeats += seconds * (_bpm / 60);
     final secondsPerBeat = 60 / _bpm;
 
+    final fired = <String>[];
     while (_nextNote < _notes.length &&
         _notes[_nextNote].beat <= _elapsedBeats) {
       final note = _notes[_nextNote++];
@@ -127,7 +131,10 @@ class PracticeController extends ChangeNotifier {
         ),
       );
       _litNoteIndex = _nextNote - 1;
+      fired.add(note.pitch);
     }
+    // 新しく鳴った音があれば、その集合をハイライト対象にする(和音は複数鍵)。
+    if (fired.isNotEmpty) _litPitches.value = fired.toSet();
 
     if (_metronomeOn) {
       final lastBeat = _contentEndBeats.ceil();
@@ -154,6 +161,7 @@ class PracticeController extends ChangeNotifier {
     _timer?.cancel();
     // 再生中に破棄されたら鳴っている音も止める(notifyListeners は呼ばない)。
     if (_isPlaying) _audio.stopAll();
+    _litPitches.dispose();
     super.dispose();
   }
 }
