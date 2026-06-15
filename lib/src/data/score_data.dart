@@ -95,19 +95,21 @@ const List<Note> _sonataFacile = [
   Note(pitch: 'C5', beat: 12, duration: 2),
 ];
 
-// ジムノペディ 第1番(サティ)ニ長調・3/4。簡易アレンジ。
+// ジムノペディ 第1番(サティ)ニ長調・3/4。高音(A5)へ跳ねて優美に下行する主題。
 const List<Note> _gymnopedie = [
   Note(pitch: 'F#5', beat: 0, duration: 3),
-  Note(pitch: 'G5', beat: 3, duration: 2),
-  Note(pitch: 'F#5', beat: 5, duration: 1),
-  Note(pitch: 'E5', beat: 6, duration: 3),
-  Note(pitch: 'D5', beat: 9, duration: 2),
-  Note(pitch: 'C#5', beat: 11, duration: 1),
-  Note(pitch: 'B4', beat: 12, duration: 3),
-  Note(pitch: 'A4', beat: 15, duration: 2),
-  Note(pitch: 'B4', beat: 17, duration: 1),
-  Note(pitch: 'C#5', beat: 18, duration: 3),
-  Note(pitch: 'D5', beat: 21, duration: 3),
+  Note(pitch: 'A5', beat: 3, duration: 2),
+  Note(pitch: 'G5', beat: 5, duration: 1),
+  Note(pitch: 'F#5', beat: 6, duration: 3),
+  Note(pitch: 'E5', beat: 9, duration: 2),
+  Note(pitch: 'D5', beat: 11, duration: 1),
+  Note(pitch: 'C#5', beat: 12, duration: 3),
+  Note(pitch: 'B4', beat: 15, duration: 2),
+  Note(pitch: 'A4', beat: 17, duration: 1),
+  Note(pitch: 'B4', beat: 18, duration: 3),
+  Note(pitch: 'C#5', beat: 21, duration: 2),
+  Note(pitch: 'D5', beat: 23, duration: 1),
+  Note(pitch: 'D5', beat: 24, duration: 3),
 ];
 
 // 歓喜の歌(第九 / ベートーヴェン)ハ長調・4/4。
@@ -239,21 +241,21 @@ const List<Note> _preludeEMinor = [
   Note(pitch: 'E4', beat: 14, duration: 2),
 ];
 
-// 月の光(ドビュッシー)ハ長調に移調・3/4。簡易アレンジ。
+// 月の光(ドビュッシー)ハ長調に移調・3/4。付点の揺れで下行する上声を再現。
 const List<Note> _clairDeLune = [
   Note(pitch: 'E5', beat: 0, duration: 1.5),
   Note(pitch: 'D5', beat: 1.5, duration: 0.5),
   Note(pitch: 'C5', beat: 2, duration: 1),
-  Note(pitch: 'B4', beat: 3, duration: 1.5),
-  Note(pitch: 'A4', beat: 4.5, duration: 0.5),
-  Note(pitch: 'G4', beat: 5, duration: 1),
-  Note(pitch: 'A4', beat: 6, duration: 1),
-  Note(pitch: 'B4', beat: 7, duration: 1),
-  Note(pitch: 'C5', beat: 8, duration: 1),
-  Note(pitch: 'D5', beat: 9, duration: 1.5),
-  Note(pitch: 'C5', beat: 10.5, duration: 0.5),
-  Note(pitch: 'B4', beat: 11, duration: 1),
-  Note(pitch: 'A4', beat: 12, duration: 3),
+  Note(pitch: 'D5', beat: 3, duration: 1.5),
+  Note(pitch: 'C5', beat: 4.5, duration: 0.5),
+  Note(pitch: 'B4', beat: 5, duration: 1),
+  Note(pitch: 'C5', beat: 6, duration: 1.5),
+  Note(pitch: 'B4', beat: 7.5, duration: 0.5),
+  Note(pitch: 'A4', beat: 8, duration: 1),
+  Note(pitch: 'B4', beat: 9, duration: 1),
+  Note(pitch: 'C5', beat: 10, duration: 1),
+  Note(pitch: 'D5', beat: 11, duration: 1),
+  Note(pitch: 'C5', beat: 12, duration: 3),
 ];
 
 // アラベスク 第1番(ドビュッシー)ホ長調・4/4。分散和音の簡易版。
@@ -403,59 +405,64 @@ const List<Note> _entertainer = [
 
 // ───────────────────── 上級 ─────────────────────
 
-// 幻想即興曲(ショパン)中間部の旋律をハ長調に移調・4/4。簡易アレンジ。
+// 幻想即興曲(ショパン)中間部の歌う旋律(通称「虹を追って」)をハ長調に移調・4/4。
 const List<Note> _fantaisieImpromptu = [
   Note(pitch: 'G4', beat: 0, duration: 1.5),
   Note(pitch: 'A4', beat: 1.5, duration: 0.5),
   Note(pitch: 'G4', beat: 2, duration: 1),
   Note(pitch: 'E4', beat: 3, duration: 1),
-  Note(pitch: 'C5', beat: 4, duration: 1.5),
-  Note(pitch: 'B4', beat: 5.5, duration: 0.5),
-  Note(pitch: 'C5', beat: 6, duration: 1),
-  Note(pitch: 'G4', beat: 7, duration: 1),
-  Note(pitch: 'A4', beat: 8, duration: 1.5),
-  Note(pitch: 'G4', beat: 9.5, duration: 0.5),
-  Note(pitch: 'F4', beat: 10, duration: 1),
-  Note(pitch: 'E4', beat: 11, duration: 1),
-  Note(pitch: 'D4', beat: 12, duration: 2),
+  Note(pitch: 'C5', beat: 4, duration: 2),
+  Note(pitch: 'B4', beat: 6, duration: 1),
+  Note(pitch: 'C5', beat: 7, duration: 1),
+  Note(pitch: 'D5', beat: 8, duration: 1),
+  Note(pitch: 'E5', beat: 9, duration: 1.5),
+  Note(pitch: 'D5', beat: 10.5, duration: 0.5),
+  Note(pitch: 'C5', beat: 11, duration: 1),
+  Note(pitch: 'A4', beat: 12, duration: 1),
+  Note(pitch: 'G4', beat: 13, duration: 2),
 ];
 
-// 愛の夢 第3番(リスト)ハ長調に移調・3/4。簡易アレンジ。
+// 愛の夢 第3番(リスト)ハ長調に移調・3/4。上行して頂点へ届く叙情的な旋律。
 const List<Note> _liebestraum = [
   Note(pitch: 'G4', beat: 0, duration: 1),
   Note(pitch: 'C5', beat: 1, duration: 2),
-  Note(pitch: 'B4', beat: 3, duration: 1),
-  Note(pitch: 'C5', beat: 4, duration: 1),
-  Note(pitch: 'D5', beat: 5, duration: 1),
+  Note(pitch: 'D5', beat: 3, duration: 1),
+  Note(pitch: 'E5', beat: 4, duration: 1),
+  Note(pitch: 'F5', beat: 5, duration: 1),
   Note(pitch: 'E5', beat: 6, duration: 2),
   Note(pitch: 'D5', beat: 8, duration: 1),
   Note(pitch: 'C5', beat: 9, duration: 1),
   Note(pitch: 'D5', beat: 10, duration: 1),
   Note(pitch: 'E5', beat: 11, duration: 1),
-  Note(pitch: 'F5', beat: 12, duration: 1),
-  Note(pitch: 'E5', beat: 13, duration: 1),
-  Note(pitch: 'D5', beat: 14, duration: 1),
-  Note(pitch: 'C5', beat: 15, duration: 2),
+  Note(pitch: 'D5', beat: 12, duration: 2),
+  Note(pitch: 'C5', beat: 14, duration: 1),
+  Note(pitch: 'G4', beat: 15, duration: 1),
+  Note(pitch: 'C5', beat: 16, duration: 2),
 ];
 
-// 小犬のワルツ(ショパン Op.64-1)ハ長調に移調・3/4。簡易アレンジ。
+// 小犬のワルツ(ショパン Op.64-1)ハ長調に移調・3/4。中心音を旋回する音型を再現。
 const List<Note> _minuteWaltz = [
   Note(pitch: 'G4', beat: 0, duration: 0.5),
   Note(pitch: 'A4', beat: 0.5, duration: 0.5),
-  Note(pitch: 'B4', beat: 1, duration: 0.5),
-  Note(pitch: 'C5', beat: 1.5, duration: 0.5),
-  Note(pitch: 'B4', beat: 2, duration: 0.5),
+  Note(pitch: 'G4', beat: 1, duration: 0.5),
+  Note(pitch: 'F4', beat: 1.5, duration: 0.5),
+  Note(pitch: 'G4', beat: 2, duration: 0.5),
   Note(pitch: 'A4', beat: 2.5, duration: 0.5),
   Note(pitch: 'G4', beat: 3, duration: 0.5),
-  Note(pitch: 'A4', beat: 3.5, duration: 0.5),
-  Note(pitch: 'B4', beat: 4, duration: 0.5),
-  Note(pitch: 'C5', beat: 4.5, duration: 0.5),
-  Note(pitch: 'D5', beat: 5, duration: 0.5),
-  Note(pitch: 'E5', beat: 5.5, duration: 0.5),
-  Note(pitch: 'D5', beat: 6, duration: 1),
-  Note(pitch: 'B4', beat: 7, duration: 1),
-  Note(pitch: 'G4', beat: 8, duration: 1),
-  Note(pitch: 'C5', beat: 9, duration: 2),
+  Note(pitch: 'F4', beat: 3.5, duration: 0.5),
+  Note(pitch: 'E4', beat: 4, duration: 0.5),
+  Note(pitch: 'F4', beat: 4.5, duration: 0.5),
+  Note(pitch: 'G4', beat: 5, duration: 0.5),
+  Note(pitch: 'A4', beat: 5.5, duration: 0.5),
+  Note(pitch: 'B4', beat: 6, duration: 0.5),
+  Note(pitch: 'C5', beat: 6.5, duration: 0.5),
+  Note(pitch: 'D5', beat: 7, duration: 0.5),
+  Note(pitch: 'E5', beat: 7.5, duration: 0.5),
+  Note(pitch: 'D5', beat: 8, duration: 0.5),
+  Note(pitch: 'C5', beat: 8.5, duration: 0.5),
+  Note(pitch: 'B4', beat: 9, duration: 1),
+  Note(pitch: 'G4', beat: 10, duration: 1),
+  Note(pitch: 'C5', beat: 11, duration: 1),
 ];
 
 // 月光 第3楽章(ベートーヴェン)嬰ハ短調・4/4。上昇分散和音の簡易版。
