@@ -5,6 +5,7 @@ import '../../domain/audio/audio_engine.dart';
 import '../../domain/score/piece.dart';
 import '../../domain/score/score_geometry.dart';
 import '../theme/etude_theme.dart';
+import '../widgets/grand_staff_view.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/score_view.dart';
 
@@ -32,6 +33,21 @@ class _PracticeScreenState extends State<PracticeScreen> {
   /// 譜面でタップして選んだ「再生開始音符」(正準順インデックス)。
   /// null なら先頭から再生する。
   int? _startIndex;
+
+  /// 両手(大譜表＋両手再生)モード。収録曲で fullNotes がある時だけ使える。
+  bool _twoHand = false;
+
+  /// 両手/片手を切り替える。再生対象(controller.piece)も差し替える。
+  void _toggleTwoHand() {
+    _controller.stop();
+    setState(() {
+      _twoHand = !_twoHand;
+      _startIndex = null;
+      _controller.piece = _twoHand
+          ? widget.piece.copyWith(notes: widget.piece.fullNotes)
+          : widget.piece;
+    });
+  }
 
   @override
   void initState() {
@@ -105,6 +121,15 @@ class _PracticeScreenState extends State<PracticeScreen> {
           widget.piece.title,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
+        actions: [
+          // 両手フル譜面がある収録曲だけ「両手のお手本」に切り替えられる。
+          if (widget.piece.hasFullScore)
+            IconButton(
+              icon: Icon(_twoHand ? Icons.piano : Icons.menu_book_outlined),
+              tooltip: _twoHand ? '片手(練習)に戻す' : '両手のお手本',
+              onPressed: _toggleTwoHand,
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -118,25 +143,38 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(12),
-                    child: ScoreView(
-                      piece: widget.piece,
-                      geometry: _geometry,
-                      scrollController: _scoreScroll,
-                      litNoteIndices: playing
-                          ? _controller.litNoteIndices
-                          : const {},
-                      playheadX: _playheadX(),
-                      // 停止中は選んだ開始音符を強調。音符タップで開始位置を選び、
-                      // 同じ音符を再タップで解除して先頭からに戻す。
-                      selectedIndex: playing ? null : _startIndex,
-                      onSelectNote: playing
-                          ? null
-                          : (i) => setState(
-                              () => _startIndex = _startIndex == i ? null : i,
-                            ),
-                    ),
+                    child: _twoHand
+                        ? GrandStaffView(
+                            notes: widget.piece.fullNotes,
+                            beatsPerMeasure: widget.piece.beatsPerMeasure,
+                            scrollController: _scoreScroll,
+                            litNoteIndices: playing
+                                ? _controller.litNoteIndices
+                                : const {},
+                            playheadX: _playheadX(),
+                            height: 190,
+                          )
+                        : ScoreView(
+                            piece: widget.piece,
+                            geometry: _geometry,
+                            scrollController: _scoreScroll,
+                            litNoteIndices: playing
+                                ? _controller.litNoteIndices
+                                : const {},
+                            playheadX: _playheadX(),
+                            // 停止中は選んだ開始音符を強調。タップで開始位置を選び、
+                            // 同じ音符を再タップで解除して先頭からに戻す。
+                            selectedIndex: playing ? null : _startIndex,
+                            onSelectNote: playing
+                                ? null
+                                : (i) => setState(
+                                    () => _startIndex = _startIndex == i
+                                        ? null
+                                        : i,
+                                  ),
+                          ),
                   ),
-                  if (!playing)
+                  if (!playing && !_twoHand)
                     const Padding(
                       padding: EdgeInsets.only(bottom: 6),
                       child: Text(
@@ -152,21 +190,26 @@ class _PracticeScreenState extends State<PracticeScreen> {
               );
             },
           ),
-          const Divider(height: 1),
-          // 鍵盤は「鳴る音が変わった時」だけ再構築する(毎フレーム再構築を避ける)。
-          Expanded(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: ValueListenableBuilder<Set<String>>(
-                valueListenable: _controller.litPitches,
-                builder: (context, lit, _) => PianoKeyboard(
-                  onNotePressed: _onKey,
-                  height: 160,
-                  litPitches: lit,
+          // 両手(お手本)モードでは鍵盤を出さず、大譜表を主役にする。
+          if (_twoHand)
+            const Spacer()
+          else ...[
+            const Divider(height: 1),
+            // 鍵盤は「鳴る音が変わった時」だけ再構築する(毎フレーム再構築を避ける)。
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: ValueListenableBuilder<Set<String>>(
+                  valueListenable: _controller.litPitches,
+                  builder: (context, lit, _) => PianoKeyboard(
+                    onNotePressed: _onKey,
+                    height: 160,
+                    litPitches: lit,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

@@ -128,4 +128,45 @@ void main() {
     print('];');
     print('');
   }
+
+  // 両手フル版(_xxxFull): しきい値・音域折込みなしで全音を保持(大譜表/両手再生用)。
+  for (final cfg in cfgs) {
+    final piece = pieces.firstWhere((p) => p['id'] == cfg.id);
+    final notes = (piece['notes'] as List).cast<Map<String, Object?>>();
+    final targetBeats = (cfg.bpm.toDouble() / cfg.bpMeas).floor() * cfg.bpMeas;
+    final seen = <String>{};
+    final full = <({double beat, int midi, double dur})>[];
+    for (final n in notes) {
+      final onset = snapGrid((n['beat'] as num).toDouble(), 0.25);
+      if (onset >= targetBeats) continue;
+      final midi = midiOf(n['pitch'] as String);
+      final dur = snapDur((n['duration'] as num).toDouble());
+      if (seen.add('$onset:$midi')) {
+        full.add((beat: onset, midi: midi, dur: dur));
+      }
+    }
+    full.sort((a, b) {
+      final c = a.beat.compareTo(b.beat);
+      return c != 0 ? c : a.midi.compareTo(b.midi);
+    });
+    final shift = full.isEmpty ? 0.0 : full.first.beat;
+    var lo = 200, hi = 0;
+    final body = StringBuffer();
+    for (final e in full) {
+      final b = e.beat - shift;
+      final bs = b == b.roundToDouble() ? b.toInt().toString() : '$b';
+      body.writeln(
+        "  Note(pitch: '${nameOf(e.midi)}', beat: $bs, duration: ${e.dur}),",
+      );
+      if (e.midi < lo) lo = e.midi;
+      if (e.midi > hi) hi = e.midi;
+    }
+    print(
+      '// ${cfg.id} full: ${full.length} notes, ${nameOf(lo)}-${nameOf(hi)}',
+    );
+    print('const List<Note> ${cfg.varName}Full = [');
+    print(body.toString().trimRight());
+    print('];');
+    print('');
+  }
 }

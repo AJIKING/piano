@@ -25,6 +25,20 @@ void main() {
     }
   });
 
+  test('fullNotes(両手フル譜面)は妥当で、実データ3曲が持つ', () {
+    final withFull = allPieces()
+        .where((p) => p.fullNotes.isNotEmpty)
+        .map((p) => p.id)
+        .toList();
+    expect(withFull, containsAll(['fur-elise', 'gymnopedie-1', 'bwv846']));
+    // fullNotes は音域(C3–B5)に縛られないが、音名・音価・非負拍は妥当であること。
+    for (final p in allPieces()) {
+      for (final n in p.fullNotes) {
+        expect(n.isValid, isTrue, reason: '${p.id}: $n');
+      }
+    }
+  });
+
   test('音域は鍵盤(C3–B5)に収まる', () {
     for (final p in allPieces()) {
       for (final n in p.notes) {

@@ -7,6 +7,7 @@ class Piece {
     required this.title,
     required this.composer,
     required this.notes,
+    this.fullNotes = const [],
     this.isUserCreated = false,
     this.beatsPerMeasure = 3,
     this.defaultBpm = 72,
@@ -16,8 +17,17 @@ class Piece {
   final String title;
   final String composer;
 
-  /// 旋律。`beat` 昇順に整列していることを期待する([sortedNotes] で正規化できる)。
+  /// 旋律(片手・弾ける単旋律)。`beat` 昇順に整列していることを期待する。
+  /// エディタ・3オクターブ鍵盤・練習はこれを使う。
   final List<Note> notes;
+
+  /// 両手のフル譜面(任意)。収録曲のうち実データのある曲だけ持つ。
+  /// 大譜表表示＋両手再生(表示専用)に使う。音域は鍵盤範囲に縛られない。
+  /// 自作曲・単旋律曲は空。
+  final List<Note> fullNotes;
+
+  /// 両手フル譜面を持つか。
+  bool get hasFullScore => fullNotes.isNotEmpty;
 
   /// 拍子の 1 小節あたりの拍数(小節線・メトロノームの強拍に使う)。
   final int beatsPerMeasure;
@@ -58,6 +68,7 @@ class Piece {
     String? title,
     String? composer,
     List<Note>? notes,
+    List<Note>? fullNotes,
     bool? isUserCreated,
     int? beatsPerMeasure,
     int? defaultBpm,
@@ -66,6 +77,7 @@ class Piece {
     title: title ?? this.title,
     composer: composer ?? this.composer,
     notes: notes ?? this.notes,
+    fullNotes: fullNotes ?? this.fullNotes,
     isUserCreated: isUserCreated ?? this.isUserCreated,
     beatsPerMeasure: beatsPerMeasure ?? this.beatsPerMeasure,
     defaultBpm: defaultBpm ?? this.defaultBpm,
@@ -79,10 +91,12 @@ class Piece {
     'beatsPerMeasure': beatsPerMeasure,
     'defaultBpm': defaultBpm,
     'notes': notes.map((n) => n.toJson()).toList(),
+    if (fullNotes.isNotEmpty)
+      'fullNotes': fullNotes.map((n) => n.toJson()).toList(),
   };
 
   factory Piece.fromJson(Map<String, Object?> json) {
-    final rawNotes = (json['notes'] as List<Object?>? ?? const [])
+    List<Note> parseNotes(Object? raw) => (raw as List<Object?>? ?? const [])
         .map((e) => Note.fromJson((e as Map).cast<String, Object?>()))
         .toList();
     return Piece(
@@ -92,7 +106,8 @@ class Piece {
       isUserCreated: json['isUserCreated'] as bool? ?? false,
       beatsPerMeasure: (json['beatsPerMeasure'] as num?)?.toInt() ?? 3,
       defaultBpm: (json['defaultBpm'] as num?)?.toInt() ?? 72,
-      notes: rawNotes,
+      notes: parseNotes(json['notes']),
+      fullNotes: parseNotes(json['fullNotes']),
     );
   }
 

@@ -1,5 +1,7 @@
+import 'package:etude/src/domain/score/note.dart';
 import 'package:etude/src/domain/score/score_geometry.dart';
 import 'package:etude/src/ui/practice/practice_screen.dart';
+import 'package:etude/src/ui/widgets/grand_staff_view.dart';
 import 'package:etude/src/ui/widgets/score_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -102,6 +104,46 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.stop_rounded));
     await tester.pump();
+  });
+
+  testWidgets('fullNotes がある曲は両手(大譜表)モードに切り替えられる', (tester) async {
+    final piece = twoBeatMelody().copyWith(
+      fullNotes: const [
+        Note(pitch: 'C3', beat: 0, duration: 1),
+        Note(pitch: 'E4', beat: 0, duration: 1),
+        Note(pitch: 'G4', beat: 1, duration: 1),
+      ],
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PracticeScreen(piece: piece, audioEngine: RecordingAudioEngine()),
+      ),
+    );
+
+    expect(find.byType(ScoreView), findsOneWidget);
+    expect(find.byType(GrandStaffView), findsNothing);
+
+    await tester.tap(find.byTooltip('両手のお手本'));
+    await tester.pump();
+    expect(find.byType(GrandStaffView), findsOneWidget);
+    expect(find.byType(ScoreView), findsNothing);
+
+    await tester.tap(find.byTooltip('片手(練習)に戻す'));
+    await tester.pump();
+    expect(find.byType(ScoreView), findsOneWidget);
+    expect(find.byType(GrandStaffView), findsNothing);
+  });
+
+  testWidgets('fullNotes が無い曲は両手トグルが出ない', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PracticeScreen(
+          piece: twoBeatMelody(),
+          audioEngine: RecordingAudioEngine(),
+        ),
+      ),
+    );
+    expect(find.byTooltip('両手のお手本'), findsNothing);
   });
 
   testWidgets('再生ボタンで再生→停止できる(保留タイマーを残さない)', (tester) async {
