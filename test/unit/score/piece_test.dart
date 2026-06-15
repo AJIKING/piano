@@ -53,20 +53,20 @@ void main() {
     });
 
     test('copyWith は指定フィールドだけ差し替える', () {
-      final updated = twoBeatMelody().copyWith(masteryPercent: 50);
-      expect(updated.masteryPercent, 50);
-      expect(updated.title, '2 拍の単旋律');
+      final updated = twoBeatMelody().copyWith(title: '改名');
+      expect(updated.title, '改名');
+      expect(updated.id, 'fixture-two-beat');
     });
 
     test('JSON 往復で主要フィールドが保たれる', () {
       final piece = twoBeatMelody().copyWith(
-        masteryPercent: 42,
-        lastPracticedAt: DateTime(2026, 1, 2, 10, 30),
+        beatsPerMeasure: 4,
+        defaultBpm: 96,
       );
       final restored = Piece.fromJson(piece.toJson());
       expect(restored.id, piece.id);
-      expect(restored.masteryPercent, 42);
-      expect(restored.lastPracticedAt, DateTime(2026, 1, 2, 10, 30));
+      expect(restored.beatsPerMeasure, 4);
+      expect(restored.defaultBpm, 96);
       expect(restored.notes, piece.notes);
     });
   });

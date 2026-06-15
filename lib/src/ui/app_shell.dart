@@ -53,7 +53,6 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
     _library = LibraryController(
       repository: widget.dependencies.scoreRepository,
       store: widget.dependencies.libraryStore,
-      clock: widget.dependencies.clock,
     );
     _editor = _makeEditor(_library.featured);
     _restore();
@@ -120,13 +119,11 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   Widget _content() {
     switch (_index) {
       case _kPractice:
-        // 再生対象と記録対象を同じ piece に固定する(完了時に参照がブレない)。
         final piece = _editor.currentPiece;
         return PracticeScreen(
           key: ValueKey('practice-${piece.id}'),
           piece: piece,
           audioEngine: _audio,
-          onCompleted: () => _library.recordPractice(piece.id),
         );
       case _kEditor:
         // controller が差し替わったら State を作り直す(古い曲名/試聴対象を残さない)。

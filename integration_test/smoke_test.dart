@@ -9,8 +9,6 @@ import 'package:integration_test/integration_test.dart';
 ///
 /// 実行にはエミュレータ / シミュレータが必要:
 /// `flutter test integration_test -d <device>`
-///
-/// 再生機能の実装後は、再生 → 停止 → 習得度反映までジャーニーを拡張する。
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -20,10 +18,9 @@ void main() {
 
     // ライブラリ表示の確認(収録曲が並ぶ)。
     expect(find.text('ライブラリ'), findsOneWidget);
-    expect(find.text('マイ楽譜'), findsOneWidget);
 
     // 収録曲の 1 つ(featured)をタップ → 練習画面へ。
-    final firstPiece = find.text('ノクターン 第2番 変ホ長調');
+    final firstPiece = find.text('ジムノペディ 第1番');
     await tester.scrollUntilVisible(
       firstPiece,
       120,

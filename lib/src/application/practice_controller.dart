@@ -16,12 +16,8 @@ class PracticeController extends ChangeNotifier {
     required this.piece,
     required AudioEngine audioEngine,
     double bpm = 72,
-    this.onCompleted,
   }) : _audio = audioEngine,
        _bpm = bpm.clamp(minBpm, maxBpm);
-
-  /// 曲を最後まで弾き切ったときに 1 度だけ呼ばれる(ユーザー停止では呼ばれない)。
-  final VoidCallback? onCompleted;
 
   static const double minBpm = 40;
   static const double maxBpm = 160;
@@ -155,8 +151,7 @@ class PracticeController extends ChangeNotifier {
     }
 
     if (_elapsedBeats >= _totalBeats) {
-      stop();
-      onCompleted?.call();
+      stop(); // 末尾＋余韻に達したら自動停止して先頭へ戻す。
       return;
     }
     notifyListeners();

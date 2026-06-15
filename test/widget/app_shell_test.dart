@@ -4,7 +4,6 @@ import 'package:etude/src/ui/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../fixtures/fake_clock.dart';
 import '../fixtures/fixture_pieces.dart';
 import '../fixtures/in_memory_library_store.dart';
 import '../fixtures/recording_audio_engine.dart';
@@ -13,7 +12,6 @@ void main() {
   ({Widget app, InMemoryLibraryStore store}) build([InMemoryLibraryStore? s]) {
     final store = s ?? InMemoryLibraryStore();
     final deps = Dependencies(
-      clock: FakeClock(DateTime(2026, 1, 1)),
       scoreRepository: FixtureScoreRepository(),
       libraryStore: store,
       audioEngine: RecordingAudioEngine(),

@@ -4,7 +4,6 @@ import 'package:etude/src/ui/library/library_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../fixtures/fake_clock.dart';
 import '../../fixtures/fixture_pieces.dart';
 import '../../fixtures/in_memory_library_store.dart';
 
@@ -12,7 +11,6 @@ void main() {
   LibraryController buildController() => LibraryController(
     repository: FixtureScoreRepository(),
     store: InMemoryLibraryStore(),
-    clock: FakeClock(DateTime(2026, 1, 1)),
   );
 
   Widget wrap(

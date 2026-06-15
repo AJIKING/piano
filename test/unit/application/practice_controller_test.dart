@@ -58,41 +58,6 @@ void main() {
       });
     });
 
-    test('弾き切ると onCompleted が 1 度だけ呼ばれる', () {
-      fakeAsync((async) {
-        var completed = 0;
-        final c = PracticeController(
-          piece: twoBeatMelody(),
-          audioEngine: RecordingAudioEngine(),
-          bpm: 60,
-          onCompleted: () => completed++,
-        );
-        c.play();
-        async.elapse(const Duration(milliseconds: 2500)); // total 2.3s 超
-        expect(completed, 1);
-        async.flushTimers();
-        c.dispose();
-      });
-    });
-
-    test('ユーザー停止では onCompleted は呼ばれない', () {
-      fakeAsync((async) {
-        var completed = 0;
-        final c = PracticeController(
-          piece: twoBeatMelody(),
-          audioEngine: RecordingAudioEngine(),
-          bpm: 60,
-          onCompleted: () => completed++,
-        );
-        c.play();
-        async.elapse(const Duration(milliseconds: 500));
-        c.stop();
-        async.flushTimers();
-        expect(completed, 0);
-        c.dispose();
-      });
-    });
-
     test('BPM 変更の瞬間に再生位置(playheadBeats)は飛ばない', () {
       fakeAsync((async) {
         final c = PracticeController(

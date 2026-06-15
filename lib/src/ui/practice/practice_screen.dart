@@ -14,14 +14,10 @@ class PracticeScreen extends StatefulWidget {
     super.key,
     required this.piece,
     required this.audioEngine,
-    this.onCompleted,
   });
 
   final Piece piece;
   final AudioEngine audioEngine;
-
-  /// 曲を最後まで弾き切ったときに呼ばれる(習得度の記録など)。
-  final VoidCallback? onCompleted;
 
   @override
   State<PracticeScreen> createState() => _PracticeScreenState();
@@ -44,7 +40,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
       piece: widget.piece,
       audioEngine: widget.audioEngine,
       bpm: widget.piece.defaultBpm.toDouble(),
-      onCompleted: widget.onCompleted,
     );
     // 鳴る音が変わるたびに(=毎フレームではなく)再生ヘッドを追従させる。
     _controller.litPitches.addListener(_followPlayhead);

@@ -37,7 +37,6 @@ domain / core にインターフェース、data に本番実装、テストに 
 
 | 境界 | インターフェースの場所 | 本番実装 | テスト実装 |
 | --- | --- | --- | --- |
-| `Clock` | `core/` | システム時刻(`SystemClock`) | 固定 fake |
 | `ScoreRepository` | `domain/score/` | 同梱 Dart データ(`BundledScoreRepository`) | 最小 fixture |
 | `LibraryStore` | `domain/library/` | shared_preferences(`PrefsLibraryStore`) | インメモリ fake |
 | `AudioEngine` | `domain/audio/` | SoundFont シンセ(`MidiProAudioEngine`、flutter_midi_pro、テスト対象外) | 呼び出し記録 fake |
@@ -56,16 +55,14 @@ lib/
 ├── main_test.dart            # integration test 用 composition root
 └── src/
     ├── app.dart              # MaterialApp・テーマ適用(home=AppShell)
-    ├── core/
-    │   └── clock.dart        # Clock インターフェースと SystemClock
     ├── domain/
     │   ├── score/
     │   │   ├── note.dart              # Note(pitch/beat/duration)・音高パース・diatonic step
-    │   │   ├── piece.dart             # Piece(曲・習得度・最終練習日時)
+    │   │   ├── piece.dart             # Piece(曲・拍子・既定テンポ・音符列)
     │   │   ├── score_geometry.dart    # 拍↔X、音高↔Y などの譜面ジオメトリ(pure Dart)
     │   │   └── score_repository.dart  # 収録曲供給インターフェース
     │   ├── library/
-    │   │   └── library_store.dart     # ユーザー楽譜・習得度の永続化インターフェース
+    │   │   └── library_store.dart     # ユーザー楽譜の永続化インターフェース
     │   └── audio/
     │       └── audio_engine.dart      # 発音・再生インターフェース(pure Dart)
     ├── data/
@@ -124,7 +121,7 @@ fake は fixture と同様に共有資産として `test/fixtures/` に置き、
 - domain のファイルに `package:flutter` を import しない。違反は `/harness-review` のレビュー観点に含まれる。
 - ui から `data/` を import しない。必要な操作はすべて application の controller を経由する。
 - 発音は必ず `AudioEngine` 境界を経由する。ui / domain から音源プラグインを直接呼ばない。
-- 再生タイミングは実時間に依存させない。`DateTime.now()` の直叩きや `sleep` / 固定 `Future.delayed` による同期を書かない(`Clock` と再生スケジュールのロジックを使う)。
+- 再生タイミングは実時間に依存させない。`DateTime.now()` の直叩きや `sleep` / 固定 `Future.delayed` による同期を書かない(`PracticeController` は `Timer` を `fake_async` で進めて検証する)。
 - 境界インターフェースにメソッドを足すときは、本番実装と fake の両方を同じ PR で更新する。
 
 ## このドキュメントの見直し時期

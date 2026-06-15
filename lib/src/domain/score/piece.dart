@@ -7,9 +7,6 @@ class Piece {
     required this.title,
     required this.composer,
     required this.notes,
-    this.stars = 0,
-    this.masteryPercent = 0,
-    this.lastPracticedAt,
     this.isUserCreated = false,
     this.beatsPerMeasure = 3,
     this.defaultBpm = 72,
@@ -22,20 +19,11 @@ class Piece {
   /// 旋律。`beat` 昇順に整列していることを期待する([sortedNotes] で正規化できる)。
   final List<Note> notes;
 
-  /// 難易度(★ 0–5)。
-  final int stars;
-
   /// 拍子の 1 小節あたりの拍数(小節線・メトロノームの強拍に使う)。
   final int beatsPerMeasure;
 
   /// 既定テンポ(BPM)。練習・試聴の初期値に使う。
   final int defaultBpm;
-
-  /// 習得度(0–100)。
-  final int masteryPercent;
-
-  /// 最終練習日時(未練習なら null)。
-  final DateTime? lastPracticedAt;
 
   /// ユーザーが作成・編集した曲か(収録曲は false)。
   final bool isUserCreated;
@@ -70,9 +58,6 @@ class Piece {
     String? title,
     String? composer,
     List<Note>? notes,
-    int? stars,
-    int? masteryPercent,
-    DateTime? lastPracticedAt,
     bool? isUserCreated,
     int? beatsPerMeasure,
     int? defaultBpm,
@@ -81,9 +66,6 @@ class Piece {
     title: title ?? this.title,
     composer: composer ?? this.composer,
     notes: notes ?? this.notes,
-    stars: stars ?? this.stars,
-    masteryPercent: masteryPercent ?? this.masteryPercent,
-    lastPracticedAt: lastPracticedAt ?? this.lastPracticedAt,
     isUserCreated: isUserCreated ?? this.isUserCreated,
     beatsPerMeasure: beatsPerMeasure ?? this.beatsPerMeasure,
     defaultBpm: defaultBpm ?? this.defaultBpm,
@@ -93,9 +75,6 @@ class Piece {
     'id': id,
     'title': title,
     'composer': composer,
-    'stars': stars,
-    'masteryPercent': masteryPercent,
-    'lastPracticedAt': lastPracticedAt?.toIso8601String(),
     'isUserCreated': isUserCreated,
     'beatsPerMeasure': beatsPerMeasure,
     'defaultBpm': defaultBpm,
@@ -106,14 +85,10 @@ class Piece {
     final rawNotes = (json['notes'] as List<Object?>? ?? const [])
         .map((e) => Note.fromJson((e as Map).cast<String, Object?>()))
         .toList();
-    final rawDate = json['lastPracticedAt'] as String?;
     return Piece(
       id: json['id']! as String,
       title: json['title']! as String,
       composer: json['composer']! as String,
-      stars: (json['stars'] as num?)?.toInt() ?? 0,
-      masteryPercent: (json['masteryPercent'] as num?)?.toInt() ?? 0,
-      lastPracticedAt: rawDate == null ? null : DateTime.parse(rawDate),
       isUserCreated: json['isUserCreated'] as bool? ?? false,
       beatsPerMeasure: (json['beatsPerMeasure'] as num?)?.toInt() ?? 3,
       defaultBpm: (json['defaultBpm'] as num?)?.toInt() ?? 72,

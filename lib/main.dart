@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import 'src/app.dart';
 import 'src/application/dependencies.dart';
-import 'src/core/clock.dart';
 import 'src/data/bundled_score_repository.dart';
 import 'src/data/midi_pro_audio_engine.dart';
 import 'src/data/prefs_library_store.dart';
@@ -19,7 +18,6 @@ void main() {
   runApp(
     EtudeApp(
       dependencies: Dependencies(
-        clock: const SystemClock(),
         scoreRepository: const BundledScoreRepository(),
         // 永続化方式は docs/design-docs/0001-library-persistence.md で決定。
         libraryStore: PrefsLibraryStore(),

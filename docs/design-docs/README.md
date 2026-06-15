@@ -10,7 +10,7 @@
 
 | 番号 | タイトル | 状態 |
 | --- | --- | --- |
-| [0001](0001-library-persistence.md) | ライブラリ(ユーザー楽譜・習得度)の永続化方式 | 採用 |
+| [0001](0001-library-persistence.md) | ライブラリ(ユーザー楽譜)の永続化方式 | 採用 |
 | [0002](0002-golden-test-operations.md) | golden test の基準 platform と baseline 運用 | 採用 |
 | [0003](0003-score-data-supply.md) | 収録曲データの供給方法 | 採用 |
 | [0004](0004-audio-engine.md) | ピアノ音源・再生エンジンの方式 | 採用 |

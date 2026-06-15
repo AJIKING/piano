@@ -11,8 +11,9 @@ import '../domain/score/note.dart';
 /// 発音する。本物のピアノ音色は `assets/audio/piano.sf2` の SoundFont に依存する
 /// (置き方は assets/audio/README.md)。
 ///
-/// このアダプタは `SystemClock` と同様に**自動テスト対象外**。実音・レイテンシは
-/// 実機 / エミュレータで確認する。テストでは `RecordingAudioEngine` を注入する。
+/// このアダプタはプラグイン呼び出しを薄く委譲するだけのため**自動テスト対象外**。
+/// 実音・レイテンシは実機 / エミュレータで確認する。テストでは
+/// `RecordingAudioEngine` を注入する。
 class MidiProAudioEngine implements AudioEngine {
   MidiProAudioEngine({this.assetPath = 'assets/audio/piano.sf2'});
 

@@ -49,12 +49,6 @@ void main() {
     expect(repo.original('user-999'), isNull);
   });
 
-  test('stars は 0–5', () {
-    for (final p in allPieces()) {
-      expect(p.stars, inInclusiveRange(0, 5), reason: p.id);
-    }
-  });
-
   test('全音符が妥当（音名・音価・非負拍）', () {
     for (final p in allPieces()) {
       for (final n in p.notes) {

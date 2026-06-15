@@ -1,17 +1,14 @@
 import 'package:etude/src/application/library_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../fixtures/fake_clock.dart';
 import '../../fixtures/fixture_pieces.dart';
 import '../../fixtures/in_memory_library_store.dart';
 
 void main() {
-  LibraryController build({InMemoryLibraryStore? store, DateTime? now}) =>
-      LibraryController(
-        repository: FixtureScoreRepository(),
-        store: store ?? InMemoryLibraryStore(),
-        clock: FakeClock(now ?? DateTime(2026, 1, 1, 9)),
-      );
+  LibraryController build({InMemoryLibraryStore? store}) => LibraryController(
+    repository: FixtureScoreRepository(),
+    store: store ?? InMemoryLibraryStore(),
+  );
 
   group('LibraryController', () {
     test('初期化時に収録曲で seed され、featured も一覧に含む', () {
@@ -98,17 +95,6 @@ void main() {
       expect(created.id, isNot('user-1'));
       // 既存の user-1 が上書きされていない。
       expect(controller.pieces.where((p) => p.id == 'user-1'), hasLength(1));
-    });
-
-    test('recordPractice は習得度を上げ、最終練習日時を記録し、永続化する', () async {
-      final store = InMemoryLibraryStore();
-      final controller = build(store: store, now: DateTime(2026, 1, 1, 9));
-
-      await controller.recordPractice('fixture-two-beat'); // featured
-
-      expect(controller.featured.masteryPercent, 12); // 0 → +12
-      expect(controller.featured.lastPracticedAt, DateTime(2026, 1, 1, 9));
-      expect(store.saveCount, 1);
     });
   });
 }

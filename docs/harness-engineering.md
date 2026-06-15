@@ -129,7 +129,7 @@ flutter test integration_test
 - `AppConfig`
 - `FeatureFlags`
 - `AudioEngine`(発音・再生の副作用境界)
-- `LibraryStore`(楽譜・習得度の永続化)
+- `LibraryStore`(ユーザー楽譜の永続化)
 - `PermissionGateway`(将来のマイク入力など)
 
 ## 4. 端末・プラットフォームハーネス
@@ -294,7 +294,7 @@ fixture に持たせたい metadata:
 1. unit / widget test では `AudioEngine` の fake(呼び出しを記録するだけで音を鳴らさない)。
 2. 再生スケジュール(音符の発音タイミング・テンポ追従・メトロノーム)は pure Dart のロジックとして切り出し、`fake_async` で実時間なしに検証する。
 3. 実音色・レイテンシ・OS のオーディオセッション挙動は実機 / エミュレータでの手動確認。
-4. 音源プラグインのアダプタ(`AudioEngine` の本番実装)は `SystemClock` と同様に自動テストの対象外とする(ADR 0004)。
+4. 音源プラグインのアダプタ(`AudioEngine` の本番実装 `MidiProAudioEngine`)は、プラグイン呼び出しを薄く委譲するだけのため自動テストの対象外とする(実機確認で担保。ADR 0004)。
 
 デフォルトのテストスイートは、実際のスピーカー出力や音源アセットのロードに依存させない。
 

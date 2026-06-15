@@ -7,7 +7,6 @@ Piece twoBeatMelody() => Piece(
   id: 'fixture-two-beat',
   title: '2 拍の単旋律',
   composer: 'テスト',
-  stars: 1,
   notes: const [
     Note(pitch: 'C4', beat: 0, duration: 1),
     Note(pitch: 'E4', beat: 1, duration: 1),
