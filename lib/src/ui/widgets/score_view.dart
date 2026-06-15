@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/score/note.dart';
@@ -11,7 +12,7 @@ class ScoreView extends StatelessWidget {
     super.key,
     required this.piece,
     this.geometry = const ScoreGeometry(),
-    this.litNoteIndex,
+    this.litNoteIndices = const {},
     this.selectedIndex,
     this.caretBeat,
     this.playheadX,
@@ -29,8 +30,9 @@ class ScoreView extends StatelessWidget {
   /// 横スクロールの制御(エディタの自動スクロール用)。
   final ScrollController? scrollController;
 
-  /// 再生中にハイライトする音符。
-  final int? litNoteIndex;
+  /// 再生中にハイライトする音符(整列した並びのインデックス)。
+  /// 同じタイミングの和音を全て光らせるため集合で持つ。
+  final Set<int> litNoteIndices;
 
   /// エディタで選択中の音符。
   final int? selectedIndex;
@@ -79,7 +81,7 @@ class ScoreView extends StatelessWidget {
       painter: _ScorePainter(
         piece: piece,
         geometry: geometry,
-        litNoteIndex: litNoteIndex,
+        litNoteIndices: litNoteIndices,
         selectedIndex: selectedIndex,
         caretBeat: caretBeat,
         playheadX: playheadX,
@@ -108,7 +110,7 @@ class _ScorePainter extends CustomPainter {
   _ScorePainter({
     required this.piece,
     required this.geometry,
-    required this.litNoteIndex,
+    required this.litNoteIndices,
     required this.selectedIndex,
     required this.caretBeat,
     required this.playheadX,
@@ -117,7 +119,7 @@ class _ScorePainter extends CustomPainter {
 
   final Piece piece;
   final ScoreGeometry geometry;
-  final int? litNoteIndex;
+  final Set<int> litNoteIndices;
   final int? selectedIndex;
   final double? caretBeat;
   final double? playheadX;
@@ -175,7 +177,13 @@ class _ScorePainter extends CustomPainter {
 
     final sorted = piece.sortedNotes;
     for (var i = 0; i < sorted.length; i++) {
-      _paintNote(canvas, g, sorted[i], i == litNoteIndex, i == selectedIndex);
+      _paintNote(
+        canvas,
+        g,
+        sorted[i],
+        litNoteIndices.contains(i),
+        i == selectedIndex,
+      );
     }
 
     if (playheadX != null) {
@@ -291,7 +299,7 @@ class _ScorePainter extends CustomPainter {
   @override
   bool shouldRepaint(_ScorePainter old) =>
       old.piece != piece ||
-      old.litNoteIndex != litNoteIndex ||
+      !setEquals(old.litNoteIndices, litNoteIndices) ||
       old.selectedIndex != selectedIndex ||
       old.caretBeat != caretBeat ||
       old.playheadX != playheadX;

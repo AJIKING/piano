@@ -119,7 +119,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
                       piece: widget.piece,
                       geometry: _geometry,
                       scrollController: _scoreScroll,
-                      litNoteIndex: playing ? _controller.litNoteIndex : null,
+                      litNoteIndices: playing
+                          ? _controller.litNoteIndices
+                          : const {},
                       playheadX: _playheadX(),
                       // 停止中は選んだ開始音符を強調。音符タップで開始位置を選び、
                       // 同じ音符を再タップで解除して先頭からに戻す。

@@ -226,7 +226,9 @@ class _EditorScreenState extends State<EditorScreen> {
                   geometry: _geometry,
                   selectedIndex: previewing ? null : _editor.selectedIndex,
                   caretBeat: previewing ? null : _editor.insertBeat,
-                  litNoteIndex: previewing ? _preview.litNoteIndex : null,
+                  litNoteIndices: previewing
+                      ? _preview.litNoteIndices
+                      : const {},
                   playheadX: previewing
                       ? _geometry.xAtBeat(_preview.playheadBeats)
                       : null,

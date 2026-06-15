@@ -43,7 +43,7 @@ class PracticeController extends ChangeNotifier {
   double _bpm;
   bool _metronomeOn = false;
   bool _isPlaying = false;
-  int? _litNoteIndex;
+  Set<int> _litNoteIndices = const {};
   final ValueNotifier<Set<String>> _litPitches = ValueNotifier(const {});
 
   Timer? _timer;
@@ -61,8 +61,9 @@ class PracticeController extends ChangeNotifier {
   /// 曲頭からの再生位置(拍)。譜面の再生ヘッド描画に使う。
   double get playheadBeats => _elapsedBeats;
 
-  /// いま鳴っている音符のインデックス([piece] の正準順)。譜面ハイライト用。
-  int? get litNoteIndex => _litNoteIndex;
+  /// いま鳴っている音符のインデックス集合([piece] の正準順)。譜面ハイライト用。
+  /// 同じタイミングの和音を全て光らせるため集合で持つ。
+  Set<int> get litNoteIndices => _litNoteIndices;
 
   /// いま鳴っている音高の集合(和音は複数)。鍵盤ハイライト用。
   /// 毎フレームではなく「鳴る音が変わった時だけ」通知するので、鍵盤は
@@ -83,7 +84,7 @@ class PracticeController extends ChangeNotifier {
     final firstNote = _notes.indexWhere((n) => n.beat >= start);
     _nextNote = firstNote < 0 ? _notes.length : firstNote;
     _nextBeat = start.ceil();
-    _litNoteIndex = null;
+    _litNoteIndices = const {};
     _litPitches.value = const {};
     _audio.init();
     _isPlaying = true;
@@ -98,7 +99,7 @@ class PracticeController extends ChangeNotifier {
     if (_isPlaying) _audio.stopAll();
     _isPlaying = false;
     _elapsedBeats = 0;
-    _litNoteIndex = null;
+    _litNoteIndices = const {};
     _litPitches.value = const {};
     notifyListeners();
   }
@@ -123,6 +124,7 @@ class PracticeController extends ChangeNotifier {
     final secondsPerBeat = 60 / _bpm;
 
     final fired = <String>[];
+    final firedIndices = <int>[];
     while (_nextNote < _notes.length &&
         _notes[_nextNote].beat <= _elapsedBeats) {
       final note = _notes[_nextNote++];
@@ -134,11 +136,14 @@ class PracticeController extends ChangeNotifier {
           microseconds: (note.duration * secondsPerBeat * 1e6).round(),
         ),
       );
-      _litNoteIndex = _nextNote - 1;
+      firedIndices.add(_nextNote - 1);
       fired.add(note.pitch);
     }
-    // 新しく鳴った音があれば、その集合をハイライト対象にする(和音は複数鍵)。
-    if (fired.isNotEmpty) _litPitches.value = fired.toSet();
+    // 新しく鳴った音があれば、その集合をハイライト対象にする(和音は複数音/複数鍵)。
+    if (fired.isNotEmpty) {
+      _litPitches.value = fired.toSet();
+      _litNoteIndices = firedIndices.toSet();
+    }
 
     if (_metronomeOn) {
       final lastBeat = _contentEndBeats.ceil();

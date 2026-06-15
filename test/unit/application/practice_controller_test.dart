@@ -295,6 +295,55 @@ void main() {
       });
     });
 
+    test('litNoteIndices は和音(同 beat)の全インデックスを返す', () {
+      fakeAsync((async) {
+        final c = PracticeController(
+          piece: Piece(
+            id: 'p',
+            title: 't',
+            composer: 'c',
+            notes: const [
+              Note(pitch: 'C4', beat: 0, duration: 1),
+              Note(pitch: 'E4', beat: 0, duration: 1),
+              Note(pitch: 'G4', beat: 0, duration: 1),
+            ],
+          ),
+          audioEngine: RecordingAudioEngine(),
+          bpm: 60,
+        );
+        expect(c.litNoteIndices, isEmpty);
+
+        c.play();
+        async.elapse(const Duration(milliseconds: 100));
+        // 3 音(正準順 C4→E4→G4)すべてが点灯対象になる。
+        expect(c.litNoteIndices, {0, 1, 2});
+
+        c.stop();
+        expect(c.litNoteIndices, isEmpty);
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
+    test('litNoteIndices は単音では 1 つだけ、次の音で切り替わる', () {
+      fakeAsync((async) {
+        final c = PracticeController(
+          piece: twoBeatMelody(), // C4@0 / E4@1
+          audioEngine: RecordingAudioEngine(),
+          bpm: 60,
+        );
+        c.play();
+        async.elapse(const Duration(milliseconds: 100)); // C4
+        expect(c.litNoteIndices, {0});
+        async.elapse(const Duration(milliseconds: 1000)); // E4
+        expect(c.litNoteIndices, {1});
+
+        c.stop();
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
     test('空の旋律では再生を開始しない', () {
       final audio = RecordingAudioEngine();
       final c = PracticeController(piece: emptyUserPiece(), audioEngine: audio);
