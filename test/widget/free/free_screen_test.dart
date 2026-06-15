@@ -27,4 +27,25 @@ void main() {
     expect(audio.playedPitches, ['C#2']);
     expect(find.text('ド♯'), findsOneWidget); // C#2 → ド♯
   });
+
+  testWidgets('全画面モードに入る/出る。鍵盤は全画面でも弾ける', (tester) async {
+    final audio = RecordingAudioEngine();
+    await tester.pumpWidget(MaterialApp(home: FreeScreen(audioEngine: audio)));
+
+    // 全画面へ → AppBar(タイトル)が消え、終了ボタンが出る。
+    await tester.tap(find.byTooltip('全画面'));
+    await tester.pump();
+    expect(find.text('自由演奏'), findsNothing);
+    expect(find.byTooltip('全画面を終了'), findsOneWidget);
+
+    // 全画面でも発音できる。
+    await tester.tap(find.byKey(const ValueKey('key-E2')));
+    await tester.pump();
+    expect(audio.playedPitches, ['E2']);
+
+    // 終了 → 通常表示に戻る。
+    await tester.tap(find.byTooltip('全画面を終了'));
+    await tester.pump();
+    expect(find.text('自由演奏'), findsOneWidget);
+  });
 }
