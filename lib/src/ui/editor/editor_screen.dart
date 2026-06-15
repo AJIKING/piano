@@ -187,9 +187,17 @@ class _EditorScreenState extends State<EditorScreen> {
               const Divider(height: 1),
               Expanded(
                 child: LayoutBuilder(
-                  builder: (context, constraints) => PianoKeyboard(
-                    onNotePressed: _onKeyboard,
-                    height: constraints.maxHeight,
+                  builder: (context, constraints) => ListenableBuilder(
+                    listenable: _preview,
+                    builder: (context, _) => PianoKeyboard(
+                      onNotePressed: _onKeyboard,
+                      height: constraints.maxHeight,
+                      // 試聴中は鳴っている鍵を光らせる。
+                      litPitches:
+                          _preview.isPlaying && _preview.litPitch != null
+                          ? {_preview.litPitch!}
+                          : const {},
+                    ),
                   ),
                 ),
               ),
@@ -343,10 +351,10 @@ class _EditorScreenState extends State<EditorScreen> {
             onPressed: _editor.clearAll,
           ),
           if (_editor.canReset)
-            IconButton(
-              tooltip: '最初の状態に戻す',
-              icon: const Icon(Icons.restore),
+            OutlinedButton.icon(
               onPressed: _confirmReset,
+              icon: const Icon(Icons.restore, size: 18),
+              label: const Text('最初に戻す'),
             ),
           Text(
             '音符数: ${_editor.noteCount}',

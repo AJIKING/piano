@@ -59,17 +59,17 @@ void main() {
     expect(find.byTooltip('戻る'), findsOneWidget);
     expect(find.byTooltip('進む'), findsOneWidget);
     expect(find.byTooltip('末尾へ(末尾に追加しやすくする)'), findsOneWidget);
-    // original 無し → 元に戻すは非表示。
-    expect(find.byTooltip('最初の状態に戻す'), findsNothing);
+    // original 無し → 最初に戻すは非表示。
+    expect(find.text('最初に戻す'), findsNothing);
   });
 
-  testWidgets('収録曲(original あり)では元に戻すが出る', (tester) async {
+  testWidgets('収録曲(original あり)では最初に戻すが出る', (tester) async {
     final original = twoBeatMelody();
     await tester.pumpWidget(
       wrap(EditorController(piece: original, original: original)),
     );
 
-    expect(find.byTooltip('最初の状態に戻す'), findsOneWidget);
+    expect(find.text('最初に戻す'), findsOneWidget);
   });
 
   testWidgets('鍵盤で追加 → 戻るで音符数が減る', (tester) async {

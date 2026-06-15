@@ -111,6 +111,34 @@ void main() {
       });
     });
 
+    test('音価が試聴/再生に反映される(8分は4分の半分の長さ・間隔)', () {
+      fakeAsync((async) {
+        final audio = RecordingAudioEngine();
+        final piece = Piece(
+          id: 'p',
+          title: 't',
+          composer: 'c',
+          notes: const [
+            Note(pitch: 'C4', beat: 0, duration: 0.5), // 8分
+            Note(pitch: 'D4', beat: 0.5, duration: 1), // 8分の直後(0.5拍後)に4分
+          ],
+        );
+        final c = PracticeController(piece: piece, audioEngine: audio, bpm: 60);
+        c.play();
+        async.elapse(const Duration(milliseconds: 700));
+
+        // 60bpm → 1拍=1秒。C4 は 0 拍、D4 は 0.5 拍(=0.5秒)後に鳴る。
+        expect(audio.playedPitches, ['C4', 'D4']);
+        // 余韻も音価に比例: 8分=0.5秒、4分=1秒。
+        expect(audio.playedSustains[0], const Duration(milliseconds: 500));
+        expect(audio.playedSustains[1], const Duration(seconds: 1));
+
+        c.stop();
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
     test('同 beat の音符(和音)はすべて発音される', () {
       fakeAsync((async) {
         final audio = RecordingAudioEngine();
@@ -162,6 +190,28 @@ void main() {
         expect(c.playheadBeats, closeTo(1.5, 0.15));
 
         c.stop();
+        async.flushTimers();
+        c.dispose();
+      });
+    });
+
+    test('litPitch は鳴っている音高を返し、停止で null', () {
+      fakeAsync((async) {
+        final c = PracticeController(
+          piece: twoBeatMelody(),
+          audioEngine: RecordingAudioEngine(),
+          bpm: 60,
+        );
+        expect(c.litPitch, isNull);
+
+        c.play();
+        async.elapse(const Duration(milliseconds: 100)); // C4
+        expect(c.litPitch, 'C4');
+        async.elapse(const Duration(milliseconds: 1000)); // E4
+        expect(c.litPitch, 'E4');
+
+        c.stop();
+        expect(c.litPitch, isNull);
         async.flushTimers();
         c.dispose();
       });

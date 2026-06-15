@@ -21,7 +21,7 @@
 | --- | --- |
 | 音符モデル(`Note`) | 音高パース(`C4` / `F#5` 等の妥当/不正)/ diatonic step 計算 / 音価の妥当性 / 同値比較 |
 | 譜面ジオメトリ(`ScoreGeometry`) | 拍 → X 座標、音高 → Y 座標、X/Y → スナップした拍・音高(エディタのタップ追加) |
-| 再生(`PracticeController`) | 拍ベースで発音時刻を進める / 末尾+余韻で停止 / 再生中のテンポ変更が即反映 / 和音(同 beat)を全て発音(すべて fake_async で実時間を使わない) |
+| 再生(`PracticeController`) | 拍ベースで発音時刻を進める / 音価が発音間隔・余韻(sustain)に反映 / 末尾+余韻で停止 / 再生中のテンポ変更が即反映 / 和音(同 beat)を全て発音 / 鳴っている音高(`litPitch`)/ すべて fake_async で実時間を使わない |
 | メトロノーム(`PracticeController`) | 1 拍ごとのクリック / 拍頭の強拍判定(3 拍子) |
 | 楽譜編集(`EditorController`) | 音符追加で beat 昇順に整列 / 選択音符の音価・♯ 変更 / 削除・全消去 / キャレット前進・末尾へ / 戻る・進む(undo/redo)/ 初期版へ戻す(収録曲のみ)/ ♯ は黒鍵を持つ音名のみ / step→音名(`Note.pitchForStep`) |
 | 習得度(`Mastery`) | 練習完了で +practiceStep / 100 で頭打ち |
@@ -34,7 +34,7 @@
 | 対象 | 守る振る舞い |
 | --- | --- |
 | ライブラリ | 「今練習中」カード(曲名・習得度・最終練習)/ マイ楽譜一覧の描画 / 作成ボタンで新規曲が増える / タップで練習画面へ遷移 |
-| 鍵盤(`PianoKeyboard`) | 白鍵・黒鍵の配置 / タップで `AudioEngine.playNote` が呼ばれる(記録 fake で検証)/ Semantics ラベル |
+| 鍵盤(`PianoKeyboard`) | 白鍵・黒鍵の配置 / タップで `AudioEngine.playNote` が呼ばれる(記録 fake で検証)/ Semantics ラベル / 再生・試聴中は鳴っている鍵をハイライト(`litPitches`) |
 | 譜面(`ScoreView`) | 音符・小節線・再生ヘッドの描画(golden 化は後続)/ 再生中ハイライト |
 | 練習(`PracticeScreen`) | 再生 / 停止トグル / テンポスライダーの反映 / メトロノーム ON/OFF(発音は記録 fake で検証、再生中タイマーは fake で進める) |
 | エディタ(`EditorScreen`) | 音符追加(譜面タップ / 鍵盤タップ)/ 選択 / 削除 / 音価・♯ ツール / 曲名編集 / 試聴・練習する遷移 |

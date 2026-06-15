@@ -12,6 +12,7 @@ class PianoKeyboard extends StatelessWidget {
     this.whiteKeyWidth = 40,
     this.blackKeyWidth = 26,
     this.height = 150,
+    this.litPitches = const {},
   });
 
   final void Function(String pitch) onNotePressed;
@@ -20,6 +21,9 @@ class PianoKeyboard extends StatelessWidget {
   final double whiteKeyWidth;
   final double blackKeyWidth;
   final double height;
+
+  /// 光らせる(鳴っている)音高。再生/試聴中のハイライト用。
+  final Set<String> litPitches;
 
   static const _whiteLetters = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   // 各白鍵の右肩に乗る黒鍵(B と E の後には無い)。
@@ -54,6 +58,7 @@ class PianoKeyboard extends StatelessWidget {
             pitch: pitch,
             width: blackKeyWidth,
             height: height * 0.62,
+            lit: litPitches.contains(pitch),
             onPressed: () => onNotePressed(pitch),
           ),
         ),
@@ -79,6 +84,7 @@ class PianoKeyboard extends StatelessWidget {
                         pitch: w.pitch,
                         width: whiteKeyWidth,
                         label: w.letter == 'C' ? w.pitch : null,
+                        lit: litPitches.contains(w.pitch),
                         onPressed: () => onNotePressed(w.pitch),
                       ),
                   ],
@@ -99,11 +105,13 @@ class _WhiteKey extends StatelessWidget {
     required this.width,
     required this.onPressed,
     this.label,
+    this.lit = false,
   });
 
   final String pitch;
   final double width;
   final String? label;
+  final bool lit;
   final VoidCallback onPressed;
 
   @override
@@ -120,10 +128,13 @@ class _WhiteKey extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           padding: const EdgeInsets.only(bottom: 7),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFF7F1E4), Color(0xFFE2D5BB)],
+              // 鳴っている鍵は真鍮色に光らせる。
+              colors: lit
+                  ? const [Color(0xFFF3DCA4), Color(0xFFEDD293)]
+                  : const [Color(0xFFF7F1E4), Color(0xFFE2D5BB)],
             ),
             border: Border.all(color: const Color(0xFFCABFA6)),
             borderRadius: const BorderRadius.vertical(
@@ -148,11 +159,13 @@ class _BlackKey extends StatelessWidget {
     required this.width,
     required this.height,
     required this.onPressed,
+    this.lit = false,
   });
 
   final String pitch;
   final double width;
   final double height;
+  final bool lit;
   final VoidCallback onPressed;
 
   @override
@@ -167,13 +180,18 @@ class _BlackKey extends StatelessWidget {
         child: Container(
           width: width,
           height: height,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF3A3040), Color(0xFF0F0B14)],
+              // 鳴っている鍵は真鍮色に光らせる。
+              colors: lit
+                  ? const [Color(0xFF6B5320), Color(0xFF3A2C10)]
+                  : const [Color(0xFF3A3040), Color(0xFF0F0B14)],
             ),
-            borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(4),
+            ),
           ),
         ),
       ),

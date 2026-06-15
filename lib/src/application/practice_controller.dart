@@ -63,6 +63,12 @@ class PracticeController extends ChangeNotifier {
   /// いま鳴っている音符のインデックス([piece] の正準順)。譜面ハイライト用。
   int? get litNoteIndex => _litNoteIndex;
 
+  /// いま鳴っている音高(無ければ null)。鍵盤ハイライト用。
+  String? get litPitch {
+    final i = _litNoteIndex;
+    return (i == null || i >= _notes.length) ? null : _notes[i].pitch;
+  }
+
   /// 先頭から再生を開始する。空の旋律では何もしない。
   void play() {
     if (_isPlaying) return;

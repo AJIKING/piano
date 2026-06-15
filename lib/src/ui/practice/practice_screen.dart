@@ -84,7 +84,15 @@ class _PracticeScreenState extends State<PracticeScreen> {
               Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: PianoKeyboard(onNotePressed: _onKey, height: 160),
+                  child: PianoKeyboard(
+                    onNotePressed: _onKey,
+                    height: 160,
+                    // 再生中は鳴っている鍵を光らせる。
+                    litPitches:
+                        _controller.isPlaying && _controller.litPitch != null
+                        ? {_controller.litPitch!}
+                        : const {},
+                  ),
                 ),
               ),
             ],
