@@ -70,6 +70,39 @@ void main() {
       expect(restored.notes, piece.notes);
     });
 
+    test('fullNotes は永続化しない(toJson に含めない)が copyWith では保つ', () {
+      final p = twoBeatMelody().copyWith(
+        fullNotes: const [
+          Note(pitch: 'C3', beat: 0, duration: 1),
+          Note(pitch: 'C5', beat: 0, duration: 1),
+        ],
+      );
+      expect(p.fullNotes, hasLength(2)); // copyWith で保持
+      expect(p.toJson().containsKey('fullNotes'), isFalse); // 量が大きいので保存しない
+      // 復元では消える(収録曲は LibraryController.restore でデータ側から再注入)。
+      expect(Piece.fromJson(p.toJson()).fullNotes, isEmpty);
+    });
+
+    test('hasTwoHandScore はバス(中央Cより下)を含む時だけ true', () {
+      expect(
+        twoBeatMelody()
+            .copyWith(
+              fullNotes: const [Note(pitch: 'C3', beat: 0, duration: 1)],
+            )
+            .hasTwoHandScore,
+        isTrue,
+      );
+      expect(
+        twoBeatMelody()
+            .copyWith(
+              fullNotes: const [Note(pitch: 'G4', beat: 0, duration: 1)],
+            )
+            .hasTwoHandScore,
+        isFalse, // 片手のみ(バス無し)
+      );
+      expect(twoBeatMelody().hasTwoHandScore, isFalse); // fullNotes 無し
+    });
+
     test('旧スキーマの JSON も読める(余分キーは無視・欠損は既定値)', () {
       // 旧バージョンの保存データ: 廃止した stars/masteryPercent/lastPracticedAt を
       // 含み、追加した beatsPerMeasure/defaultBpm を含まない。

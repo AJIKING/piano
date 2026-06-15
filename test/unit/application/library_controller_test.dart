@@ -1,4 +1,7 @@
 import 'package:etude/src/application/library_controller.dart';
+import 'package:etude/src/domain/score/note.dart';
+import 'package:etude/src/domain/score/piece.dart';
+import 'package:etude/src/domain/score/score_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../fixtures/fixture_pieces.dart';
@@ -96,5 +99,47 @@ void main() {
       // 既存の user-1 が上書きされていない。
       expect(controller.pieces.where((p) => p.id == 'user-1'), hasLength(1));
     });
+
+    test('restore は収録曲の fullNotes をデータ側から再注入する', () async {
+      // 保存データには fullNotes が無い(永続化しない設計)が、id 一致の収録曲は
+      // リポジトリ側の fullNotes を補う。
+      final store = InMemoryLibraryStore([
+        Piece(
+          id: 'feat',
+          title: '編集済み',
+          composer: 'c',
+          notes: const [Note(pitch: 'C4', beat: 0, duration: 1)],
+        ),
+      ]);
+      final controller = LibraryController(
+        repository: _RepoWithFull(),
+        store: store,
+      );
+
+      await controller.restore();
+
+      expect(controller.featured.id, 'feat');
+      expect(controller.featured.fullNotes, hasLength(1)); // 再注入された
+    });
   });
+}
+
+/// fullNotes を持つ収録曲を1曲だけ返すテスト用リポジトリ。
+class _RepoWithFull implements ScoreRepository {
+  static final _feat = Piece(
+    id: 'feat',
+    title: 'F',
+    composer: 'c',
+    notes: const [Note(pitch: 'C4', beat: 0, duration: 1)],
+    fullNotes: const [Note(pitch: 'C3', beat: 0, duration: 1)],
+  );
+
+  @override
+  Piece featured() => _feat;
+
+  @override
+  List<Piece> samplePieces() => const [];
+
+  @override
+  Piece? original(String id) => id == _feat.id ? _feat : null;
 }

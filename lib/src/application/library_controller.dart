@@ -11,10 +11,12 @@ import '../domain/score/score_repository.dart';
 /// [restore] で永続化済みのコレクションを上書きする(非同期)。
 class LibraryController extends ChangeNotifier {
   LibraryController({required ScoreRepository repository, required this._store})
-    : _seedFeatured = repository.featured(),
+    : _repository = repository,
+      _seedFeatured = repository.featured(),
       _featuredId = repository.featured().id,
       _pieces = [repository.featured(), ...repository.samplePieces()];
 
+  final ScoreRepository _repository;
   final LibraryStore _store;
   final Piece _seedFeatured;
   final String _featuredId;
@@ -35,13 +37,25 @@ class LibraryController extends ChangeNotifier {
 
   /// 永続化済みのコレクションがあれば読み込んで置き換える。
   /// 旧スキーマで featured を含まない保存データには featured を補う。
+  /// fullNotes(両手フル譜面)は永続化していないため、収録曲は id でデータ側から
+  /// 再注入する(保存サイズを抑えつつ、アプリ更新でのデータ改善にも追従できる)。
   Future<void> restore() async {
     final saved = await _store.load();
     if (saved == null || saved.isEmpty) return;
-    _pieces = saved.any((p) => p.id == _featuredId)
+    final placed = saved.any((p) => p.id == _featuredId)
         ? saved
         : [_seedFeatured, ...saved];
+    _pieces = placed.map(_withFullNotes).toList();
     notifyListeners();
+  }
+
+  /// 収録曲データに対応する id があれば fullNotes を補う(自作曲は対象外)。
+  Piece _withFullNotes(Piece piece) {
+    if (piece.fullNotes.isNotEmpty) return piece;
+    final original = _repository.original(piece.id);
+    return (original != null && original.fullNotes.isNotEmpty)
+        ? piece.copyWith(fullNotes: original.fullNotes)
+        : piece;
   }
 
   /// 空の自作曲(「無題の楽譜」)を作成して末尾に追加し、永続化する。

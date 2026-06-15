@@ -11,6 +11,7 @@ import '../../domain/score/score_geometry.dart';
 /// step 0–8、ヘ音譜表は step −12〜−4 に並び、中央 C(step −2)が両譜表の間に
 /// 加線で載る。音高だけで段が自動的に決まるので、左手/右手の区別データは不要。
 ///
+/// 高さ・縦オフセットは**音域から自動算出**する(高音/低音が見切れないように)。
 /// 編集はしない(キャレット/選択なし)。再生ヘッド・発音中ハイライトのみ。
 class GrandStaffView extends StatelessWidget {
   const GrandStaffView({
@@ -20,7 +21,6 @@ class GrandStaffView extends StatelessWidget {
     this.geometry = const ScoreGeometry(),
     this.litNoteIndices = const {},
     this.playheadX,
-    this.height = 150,
     this.scrollController,
   });
 
@@ -34,14 +34,29 @@ class GrandStaffView extends StatelessWidget {
 
   /// 再生ヘッドの x(再生中のみ)。
   final double? playheadX;
-  final double height;
   final ScrollController? scrollController;
+
+  static const _padTop = 26.0;
+  static const _padBottom = 26.0;
 
   @override
   Widget build(BuildContext context) {
-    final contentEnd = Piece.contentEndOf(notes);
-    final rawWidth = geometry.xAtBeat(contentEnd) + 16;
+    final sorted = List<Note>.of(notes)..sort(Piece.compareNotes);
+
+    // 譜表は常に表示しつつ、音符の最高/最低 step まで描画範囲を広げる。
+    var maxStep = 8, minStep = -12;
+    for (final n in sorted) {
+      final s = n.diatonicStep;
+      if (s > maxStep) maxStep = s;
+      if (s < minStep) minStep = s;
+    }
+    // 最高音(maxStep)の符尾上端が _padTop に来るよう縦オフセットを決める。
+    final dy = _padTop - geometry.yForStep(maxStep);
+    final height = geometry.yForStep(minStep) + dy + _padBottom;
+
+    final rawWidth = geometry.xAtBeat(Piece.contentEndOf(sorted)) + 16;
     final width = rawWidth < 280 ? 280.0 : rawWidth;
+
     return SizedBox(
       height: height,
       child: SingleChildScrollView(
@@ -51,10 +66,12 @@ class GrandStaffView extends StatelessWidget {
           size: Size(width, height),
           painter: _GrandStaffPainter(
             notes: notes,
+            sorted: sorted,
             geometry: geometry,
             beatsPerMeasure: beatsPerMeasure,
             litNoteIndices: litNoteIndices,
             playheadX: playheadX,
+            dy: dy,
           ),
         ),
       ),
@@ -65,17 +82,22 @@ class GrandStaffView extends StatelessWidget {
 class _GrandStaffPainter extends CustomPainter {
   _GrandStaffPainter({
     required this.notes,
+    required this.sorted,
     required this.geometry,
     required this.beatsPerMeasure,
     required this.litNoteIndices,
     required this.playheadX,
+    required this.dy,
   });
 
+  /// shouldRepaint の参照比較用(元リスト。描画には [sorted] を使う)。
   final List<Note> notes;
+  final List<Note> sorted;
   final ScoreGeometry geometry;
   final int beatsPerMeasure;
   final Set<int> litNoteIndices;
   final double? playheadX;
+  final double dy;
 
   static const _paper = Color(0xFFF4EDDC);
   static const _staffLine = Color(0xFF9D8E6F);
@@ -88,10 +110,7 @@ class _GrandStaffPainter extends CustomPainter {
   // ヘ音譜表の線(下から G2,B2,D3,F3,A3)= step −12,−10,−8,−6,−4。
   static const _bassSteps = [-12, -10, -8, -6, -4];
 
-  // 高音側で符尾/加線が切れないよう全体を少し下げる。
-  static const _dy = 12.0;
-
-  double _y(int step) => geometry.yForStep(step) + _dy;
+  double _y(int step) => geometry.yForStep(step) + dy;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -125,13 +144,12 @@ class _GrandStaffPainter extends CustomPainter {
     final barPaint = Paint()
       ..color = _bar
       ..strokeWidth = 1;
-    final contentEnd = Piece.contentEndOf(notes);
+    final contentEnd = Piece.contentEndOf(sorted);
     for (var b = beatsPerMeasure; b < contentEnd; b += beatsPerMeasure) {
       final x = g.xAtBeat(b.toDouble()) - 13;
       canvas.drawLine(Offset(x, braceTop), Offset(x, braceBottom), barPaint);
     }
 
-    final sorted = List<Note>.of(notes)..sort(Piece.compareNotes);
     for (var i = 0; i < sorted.length; i++) {
       _paintNote(canvas, sorted[i], litNoteIndices.contains(i));
     }
@@ -217,7 +235,8 @@ class _GrandStaffPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_GrandStaffPainter old) =>
-      old.notes != notes ||
+      !identical(old.notes, notes) ||
+      old.dy != dy ||
       old.beatsPerMeasure != beatsPerMeasure ||
       !setEquals(old.litNoteIndices, litNoteIndices) ||
       old.playheadX != playheadX;

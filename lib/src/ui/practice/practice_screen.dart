@@ -122,8 +122,8 @@ class _PracticeScreenState extends State<PracticeScreen> {
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         actions: [
-          // 両手フル譜面がある収録曲だけ「両手のお手本」に切り替えられる。
-          if (widget.piece.hasFullScore)
+          // 両手(バスを含む)フル譜面がある収録曲だけ「両手のお手本」に切り替えられる。
+          if (widget.piece.hasTwoHandScore)
             IconButton(
               icon: Icon(_twoHand ? Icons.piano : Icons.menu_book_outlined),
               tooltip: _twoHand ? '片手(練習)に戻す' : '両手のお手本',
@@ -152,7 +152,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
                                 ? _controller.litNoteIndices
                                 : const {},
                             playheadX: _playheadX(),
-                            height: 190,
                           )
                         : ScoreView(
                             piece: widget.piece,

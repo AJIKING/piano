@@ -29,6 +29,10 @@ class Piece {
   /// 両手フル譜面を持つか。
   bool get hasFullScore => fullNotes.isNotEmpty;
 
+  /// 両手の「お手本」に使えるか(バス=中央C(C4=60)より下の音を含む)。
+  /// 片手だけの薄い fullNotes(メヌエット等)では false にして両手トグルを出さない。
+  bool get hasTwoHandScore => fullNotes.any((n) => Note.midiOf(n.pitch) < 60);
+
   /// 拍子の 1 小節あたりの拍数(小節線・メトロノームの強拍に使う)。
   final int beatsPerMeasure;
 
@@ -91,8 +95,8 @@ class Piece {
     'beatsPerMeasure': beatsPerMeasure,
     'defaultBpm': defaultBpm,
     'notes': notes.map((n) => n.toJson()).toList(),
-    if (fullNotes.isNotEmpty)
-      'fullNotes': fullNotes.map((n) => n.toJson()).toList(),
+    // fullNotes(両手フル譜面)は収録曲データ由来で量が大きいため永続化しない。
+    // 復元時に id でデータ側から再注入する([LibraryController.restore])。
   };
 
   factory Piece.fromJson(Map<String, Object?> json) {

@@ -47,4 +47,23 @@ void main() {
     await tester.pumpWidget(wrap(const GrandStaffView(notes: [])));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('音域が広い曲ほど譜面が高くなる(高音/低音が切れない)', (tester) async {
+    Future<double> heightOf(List<Note> notes) async {
+      await tester.pumpWidget(wrap(GrandStaffView(notes: notes)));
+      return tester.getSize(find.byType(GrandStaffView)).height;
+    }
+
+    final narrow = await heightOf(const [
+      Note(pitch: 'C4', beat: 0, duration: 1),
+      Note(pitch: 'G4', beat: 1, duration: 1),
+    ]);
+    final wide = await heightOf(const [
+      Note(pitch: 'A1', beat: 0, duration: 1), // 低音
+      Note(pitch: 'C6', beat: 1, duration: 1), // 高音
+    ]);
+
+    expect(wide, greaterThan(narrow)); // 音域に応じて高さが伸びる
+    expect(tester.takeException(), isNull);
+  });
 }
