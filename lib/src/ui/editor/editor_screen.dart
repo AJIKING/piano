@@ -44,12 +44,14 @@ class _EditorScreenState extends State<EditorScreen> {
 
   EditorController get _editor => widget.controller;
 
-  // 音価ツール。value=拍, label=表示, tip=説明(付点2分 / 2分 / 4分 / 8分)。
+  // 音価ツール。value=拍, label=表示, tip=説明。
   static const _durations = <({double value, String label, String tip})>[
     (value: 3, label: '2.', tip: '付点2分音符'),
     (value: 2, label: '2', tip: '2分音符'),
+    (value: 1.5, label: '4.', tip: '付点4分音符'),
     (value: 1, label: '4', tip: '4分音符'),
     (value: 0.5, label: '8', tip: '8分音符'),
+    (value: 0.25, label: '16', tip: '16分音符'),
   ];
 
   @override

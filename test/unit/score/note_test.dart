@@ -41,16 +41,21 @@ void main() {
 
   group('Note 妥当性と ♯ 可否', () {
     test('音価は許容値のみ妥当', () {
+      // 16分/8分/4分/付点4分/2分/付点2分 は妥当。
+      for (final d in const <double>[0.25, 0.5, 1, 1.5, 2, 3]) {
+        expect(
+          Note(pitch: 'C4', beat: 0, duration: d).hasValidDuration,
+          isTrue,
+          reason: 'duration=$d',
+        );
+      }
+      // 未対応の音価は不妥当(付点8分 0.75 / 全音符 4)。
       expect(
-        const Note(pitch: 'C4', beat: 0, duration: 1).hasValidDuration,
-        isTrue,
+        const Note(pitch: 'C4', beat: 0, duration: 0.75).hasValidDuration,
+        isFalse,
       );
       expect(
-        const Note(pitch: 'C4', beat: 0, duration: 0.5).hasValidDuration,
-        isTrue,
-      );
-      expect(
-        const Note(pitch: 'C4', beat: 0, duration: 1.5).hasValidDuration,
+        const Note(pitch: 'C4', beat: 0, duration: 4).hasValidDuration,
         isFalse,
       );
     });

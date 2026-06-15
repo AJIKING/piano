@@ -12,9 +12,10 @@ class Note {
   final double beat;
   final double duration;
 
-  /// 許容する音価(拍単位)。プロトタイプのエディタが扱う 4 種。
+  /// 許容する音価(拍単位)。16分(0.25)/ 8分(0.5)/ 4分(1)/ 付点4分(1.5)/
+  /// 2分(2)/ 付点2分(3)の 6 種。
   /// (double は == を override するため const Set には入れられない。List で持つ)
-  static const List<double> allowedDurations = [0.5, 1, 2, 3];
+  static const List<double> allowedDurations = [0.25, 0.5, 1, 1.5, 2, 3];
 
   static final RegExp _pitchPattern = RegExp(r'^([A-G])(#?)([0-9])$');
 
