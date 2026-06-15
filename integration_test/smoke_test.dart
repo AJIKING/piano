@@ -20,7 +20,7 @@ void main() {
     expect(find.text('ライブラリ'), findsOneWidget);
 
     // 収録曲の 1 つ(featured)をタップ → 練習画面へ。
-    final firstPiece = find.text('ジムノペディ 第1番');
+    final firstPiece = find.text('エリーゼのために');
     await tester.scrollUntilVisible(
       firstPiece,
       120,
