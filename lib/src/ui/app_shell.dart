@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../application/dependencies.dart';
 import '../application/editor_controller.dart';
 import '../application/library_controller.dart';
@@ -162,35 +163,36 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
 
   /// 開いた状態のナビゲーションレール(先頭に閉じるボタン)。
   Widget _rail() {
+    final l = AppLocalizations.of(context);
     return NavigationRail(
       selectedIndex: _index,
       onDestinationSelected: _select,
       labelType: NavigationRailLabelType.all,
       leading: IconButton(
         icon: const Icon(Icons.menu_open),
-        tooltip: 'メニューを閉じる',
+        tooltip: l.menuClose,
         onPressed: () => setState(() => _railOpen = false),
       ),
-      destinations: const [
+      destinations: [
         NavigationRailDestination(
-          icon: Icon(Icons.library_music_outlined),
-          selectedIcon: Icon(Icons.library_music),
-          label: Text('楽譜'),
+          icon: const Icon(Icons.library_music_outlined),
+          selectedIcon: const Icon(Icons.library_music),
+          label: Text(l.navScore),
         ),
         NavigationRailDestination(
-          icon: Icon(Icons.piano_outlined),
-          selectedIcon: Icon(Icons.piano),
-          label: Text('練習'),
+          icon: const Icon(Icons.piano_outlined),
+          selectedIcon: const Icon(Icons.piano),
+          label: Text(l.navPractice),
         ),
         NavigationRailDestination(
-          icon: Icon(Icons.edit_outlined),
-          selectedIcon: Icon(Icons.edit),
-          label: Text('編集'),
+          icon: const Icon(Icons.edit_outlined),
+          selectedIcon: const Icon(Icons.edit),
+          label: Text(l.navEdit),
         ),
         NavigationRailDestination(
-          icon: Icon(Icons.music_note_outlined),
-          selectedIcon: Icon(Icons.music_note),
-          label: Text('演奏'),
+          icon: const Icon(Icons.music_note_outlined),
+          selectedIcon: const Icon(Icons.music_note),
+          label: Text(l.navPlay),
         ),
       ],
     );
@@ -205,7 +207,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           const SizedBox(height: 4),
           IconButton(
             icon: const Icon(Icons.menu),
-            tooltip: 'メニューを開く',
+            tooltip: AppLocalizations.of(context).menuOpen,
             onPressed: () => setState(() => _railOpen = true),
           ),
         ],

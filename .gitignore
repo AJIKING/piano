@@ -50,3 +50,7 @@ app.*.map.json
 
 # SoundFont(音源バイナリ)は大きいので追跡しない。配置方法は assets/audio/README.md
 assets/audio/*.sf2
+
+# 多言語リソースの生成物(flutter pub get / gen-l10n が lib/l10n/ に再生成する)。
+# ソース(.arb)と l10n.yaml は追跡し、生成 .dart は追跡しない。
+/lib/l10n/app_localizations*.dart

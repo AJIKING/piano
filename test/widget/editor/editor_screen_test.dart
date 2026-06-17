@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../fixtures/fixture_pieces.dart';
+import '../../fixtures/localized_app.dart';
 import '../../fixtures/recording_audio_engine.dart';
 
 void main() {
@@ -11,7 +12,7 @@ void main() {
     EditorController controller, {
     RecordingAudioEngine? audio,
     VoidCallback? onSave,
-  }) => MaterialApp(
+  }) => localizedApp(
     home: EditorScreen(
       controller: controller,
       audioEngine: audio ?? RecordingAudioEngine(),

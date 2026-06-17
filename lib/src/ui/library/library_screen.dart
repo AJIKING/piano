@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../application/library_controller.dart';
 import '../../domain/score/piece.dart';
+import '../i18n/piece_labels.dart';
 import '../theme/etude_theme.dart';
 
 /// ライブラリ画面(レールの「楽譜」タブ)。楽譜一覧＋作成。
@@ -20,19 +22,24 @@ class LibraryScreen extends StatelessWidget {
   final void Function(Piece piece) onOpenPractice;
   final void Function(Piece piece) onOpenEditor;
 
-  Future<void> _create() async {
-    final piece = await controller.createPiece();
+  Future<void> _create(BuildContext context) async {
+    final l = AppLocalizations.of(context);
+    final piece = await controller.createPiece(
+      title: l.untitledScore,
+      composer: l.composerSelf,
+    );
     onOpenEditor(piece);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('ライブラリ')),
+      appBar: AppBar(title: Text(l.libraryTitle)),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _create,
+        onPressed: () => _create(context),
         icon: const Icon(Icons.add),
-        label: const Text('楽譜を作成'),
+        label: Text(l.createScore),
       ),
       body: ListenableBuilder(
         listenable: controller,
@@ -92,15 +99,15 @@ class _PieceRow extends StatelessWidget {
         ),
       ),
       title: Text(
-        piece.title,
+        localizedPieceTitle(context, piece),
         style: const TextStyle(fontFamily: 'ShipporiMincho', fontSize: 15),
       ),
       subtitle: Text(
-        piece.composer,
+        localizedPieceComposer(context, piece),
         style: const TextStyle(fontSize: 11, color: EtudeColors.ivory3),
       ),
       trailing: IconButton(
-        tooltip: '編集',
+        tooltip: AppLocalizations.of(context).edit,
         icon: const Icon(Icons.edit_outlined, size: 18),
         onPressed: onEdit,
       ),

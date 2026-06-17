@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../application/practice_controller.dart';
 import '../../domain/audio/audio_engine.dart';
 import '../../domain/score/piece.dart';
 import '../../domain/score/score_geometry.dart';
+import '../i18n/piece_labels.dart';
 import '../theme/etude_theme.dart';
 import '../widgets/grand_staff_view.dart';
 import '../widgets/piano_keyboard.dart';
@@ -105,12 +107,13 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         // 横画面で縦を節約するため、曲名はやや小さめ・低めのバーに。
         toolbarHeight: 48,
         title: Text(
-          widget.piece.title,
+          localizedPieceTitle(context, widget.piece),
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         actions: [
@@ -118,7 +121,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
           if (widget.piece.hasTwoHandScore)
             IconButton(
               icon: Icon(_twoHand ? Icons.piano : Icons.menu_book_outlined),
-              tooltip: _twoHand ? '片手(練習)に戻す' : '両手のお手本',
+              tooltip: _twoHand ? l.oneHandBack : l.twoHandModel,
               onPressed: _toggleTwoHand,
             ),
         ],
@@ -210,7 +213,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   ? Icons.stop_rounded
                   : Icons.play_arrow_rounded,
             ),
-            tooltip: _controller.isPlaying ? '停止' : '再生',
+            tooltip: _controller.isPlaying
+                ? AppLocalizations.of(context).stop
+                : AppLocalizations.of(context).play,
           ),
           const SizedBox(width: 8),
           Text(
@@ -237,7 +242,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
             isSelected: _controller.metronomeOn,
             icon: const Icon(Icons.av_timer_outlined),
             selectedIcon: const Icon(Icons.av_timer),
-            tooltip: 'メトロノーム',
+            tooltip: AppLocalizations.of(context).metronome,
           ),
         ],
       ),

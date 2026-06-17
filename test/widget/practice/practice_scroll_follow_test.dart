@@ -7,6 +7,7 @@ import 'package:etude/src/ui/widgets/score_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../fixtures/localized_app.dart';
 import '../../fixtures/recording_audio_engine.dart';
 
 /// 横スクロールできる長さの旋律(0.25 拍ごとに音→onset が頻繁に出る)。
@@ -34,7 +35,7 @@ Future<void> pumpSteps(
 void main() {
   testWidgets('再生中に手動スクロールしたら追従で戻らない', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: PracticeScreen(
           piece: longMelody(),
           audioEngine: RecordingAudioEngine(),
@@ -91,7 +92,7 @@ void main() {
   testWidgets('エディタ試聴中に手動スクロールしたら追従で戻らない', (tester) async {
     final controller = EditorController(piece: longMelody());
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: EditorScreen(
           controller: controller,
           audioEngine: RecordingAudioEngine(),

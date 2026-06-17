@@ -12,6 +12,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # 多言語対応(日本語 / 英語 / 簡体字中国語)。公式 gen_l10n(ARB)を使う。
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
 
   cupertino_icons: ^1.0.8
   # ライブラリ(ユーザー楽譜・習得度)の永続化。ADR 0001 参照。
@@ -33,6 +37,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # 多言語の ARB(lib/l10n/)から AppLocalizations を生成する(l10n.yaml 参照)。
+  generate: true
 
   # 音源アセット。ピアノ音色の SoundFont を assets/audio/piano.sf2 に置く
   # (詳細は assets/audio/README.md)。ディレクトリ宣言なので .sf2 を入れれば自動同梱。

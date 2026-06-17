@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../application/editor_controller.dart';
 import '../../application/practice_controller.dart';
 import '../../domain/audio/audio_engine.dart';
@@ -45,15 +46,26 @@ class _EditorScreenState extends State<EditorScreen> {
 
   EditorController get _editor => widget.controller;
 
-  // 音価ツール。value=拍, label=表示, tip=説明。
-  static const _durations = <({double value, String label, String tip})>[
-    (value: 3, label: '2.', tip: '付点2分音符'),
-    (value: 2, label: '2', tip: '2分音符'),
-    (value: 1.5, label: '4.', tip: '付点4分音符'),
-    (value: 1, label: '4', tip: '4分音符'),
-    (value: 0.5, label: '8', tip: '8分音符'),
-    (value: 0.25, label: '16', tip: '16分音符'),
+  // 音価ツール。value=拍, label=表示(数字なので翻訳不要)。説明は [_durationTip]。
+  static const _durations = <({double value, String label})>[
+    (value: 3, label: '2.'),
+    (value: 2, label: '2'),
+    (value: 1.5, label: '4.'),
+    (value: 1, label: '4'),
+    (value: 0.5, label: '8'),
+    (value: 0.25, label: '16'),
   ];
+
+  /// 音価ツールの説明(ツールチップ)を表示言語で返す。
+  static String _durationTip(AppLocalizations l, double value) =>
+      switch (value) {
+        3 => l.dottedHalfNote,
+        2 => l.halfNote,
+        1.5 => l.dottedQuarterNote,
+        1 => l.quarterNote,
+        0.5 => l.eighthNote,
+        _ => l.sixteenthNote,
+      };
 
   @override
   void initState() {
@@ -143,7 +155,10 @@ class _EditorScreenState extends State<EditorScreen> {
   void _save() {
     widget.onSave?.call();
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('保存しました'), duration: Duration(seconds: 1)),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).saved),
+        duration: const Duration(seconds: 1),
+      ),
     );
   }
 
@@ -168,19 +183,20 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   Future<void> _confirmReset() async {
+    final l = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('最初の状態に戻す'),
-        content: const Text('この曲の編集を取り消して、最初に用意された楽譜に戻しますか？'),
+        title: Text(l.resetTitle),
+        content: Text(l.resetBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('キャンセル'),
+            child: Text(l.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('戻す'),
+            child: Text(l.reset),
           ),
         ],
       ),
@@ -279,10 +295,10 @@ class _EditorScreenState extends State<EditorScreen> {
                 fontFamily: 'ShipporiMincho',
                 fontSize: 18,
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 isDense: true,
                 counterText: '',
-                hintText: '曲名',
+                hintText: AppLocalizations.of(context).songNameHint,
               ),
             ),
           ),
@@ -298,14 +314,18 @@ class _EditorScreenState extends State<EditorScreen> {
                     ? Icons.stop_rounded
                     : Icons.play_arrow_rounded,
               ),
-              label: Text(_preview.isPlaying ? '停止' : '試聴'),
+              label: Text(
+                _preview.isPlaying
+                    ? AppLocalizations.of(context).stop
+                    : AppLocalizations.of(context).preview,
+              ),
             ),
           ),
           const SizedBox(width: 4),
           FilledButton.icon(
             onPressed: _save,
             icon: const Icon(Icons.save_outlined, size: 18),
-            label: const Text('保存する'),
+            label: Text(AppLocalizations.of(context).save),
           ),
         ],
       ),
@@ -323,7 +343,7 @@ class _EditorScreenState extends State<EditorScreen> {
           children: [
             IconButton(
               visualDensity: VisualDensity.compact,
-              tooltip: 'テンポを下げる',
+              tooltip: AppLocalizations.of(context).tempoDown,
               icon: const Icon(Icons.remove, size: 18),
               onPressed: bpm > PracticeController.minBpm
                   ? () => _preview.setBpm(bpm - 4)
@@ -342,7 +362,7 @@ class _EditorScreenState extends State<EditorScreen> {
             ),
             IconButton(
               visualDensity: VisualDensity.compact,
-              tooltip: 'テンポを上げる',
+              tooltip: AppLocalizations.of(context).tempoUp,
               icon: const Icon(Icons.add, size: 18),
               onPressed: bpm < PracticeController.maxBpm
                   ? () => _preview.setBpm(bpm + 4)
@@ -378,6 +398,7 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   Widget _toolbar() {
+    final l = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Wrap(
@@ -392,7 +413,7 @@ class _EditorScreenState extends State<EditorScreen> {
                 ButtonSegment(
                   value: d.value,
                   label: Text(d.label),
-                  tooltip: d.tip,
+                  tooltip: _durationTip(l, d.value),
                 ),
             ],
             selected: {_editor.currentDuration},
@@ -404,38 +425,38 @@ class _EditorScreenState extends State<EditorScreen> {
             onSelected: (_) => _editor.toggleSharp(),
           ),
           IconButton(
-            tooltip: '戻る',
+            tooltip: l.undo,
             icon: const Icon(Icons.undo),
             onPressed: _editor.canUndo ? _undo : null,
           ),
           IconButton(
-            tooltip: '進む',
+            tooltip: l.redo,
             icon: const Icon(Icons.redo),
             onPressed: _editor.canRedo ? _redo : null,
           ),
           IconButton(
-            tooltip: '末尾へ(末尾に追加しやすくする)',
+            tooltip: l.toEnd,
             icon: const Icon(Icons.last_page),
             onPressed: _editor.moveCaretToEnd,
           ),
           IconButton(
-            tooltip: '選択を削除',
+            tooltip: l.deleteSelection,
             icon: const Icon(Icons.backspace_outlined),
             onPressed: _editor.deleteSelected,
           ),
           IconButton(
-            tooltip: '全消去',
+            tooltip: l.clearAll,
             icon: const Icon(Icons.delete_outline),
             onPressed: _editor.clearAll,
           ),
           if (_editor.canReset)
             IconButton(
-              tooltip: '最初に戻す',
+              tooltip: l.resetToOriginal,
               icon: const Icon(Icons.settings_backup_restore),
               onPressed: _confirmReset,
             ),
           Text(
-            '音符数: ${_editor.noteCount}',
+            l.noteCount(_editor.noteCount),
             style: const TextStyle(fontSize: 11, color: EtudeColors.ivory3),
           ),
         ],

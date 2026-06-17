@@ -1,6 +1,6 @@
 import 'package:etude/main_test.dart' as app;
 import 'package:etude/src/ui/widgets/score_view.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -16,17 +16,11 @@ void main() {
     app.runTestApp();
     await tester.pumpAndSettle();
 
-    // ライブラリ表示の確認(収録曲が並ぶ)。
-    expect(find.text('ライブラリ'), findsOneWidget);
+    // ライブラリに収録曲が並ぶ(曲名は端末ロケールで変わるので件数で確認)。
+    expect(find.byType(ListTile), findsWidgets);
 
-    // 収録曲の 1 つ(featured)をタップ → 練習画面へ。
-    final firstPiece = find.text('エリーゼのために');
-    await tester.scrollUntilVisible(
-      firstPiece,
-      120,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(firstPiece);
+    // 収録曲の先頭をタップ → 練習画面へ(曲名に依存せずロケール非依存に)。
+    await tester.tap(find.byType(ListTile).first);
     await tester.pumpAndSettle();
 
     // 練習画面が開く(譜面が描画される)。

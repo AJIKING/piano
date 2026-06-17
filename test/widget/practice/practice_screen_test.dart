@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../fixtures/fixture_pieces.dart';
+import '../../fixtures/localized_app.dart';
 import '../../fixtures/recording_audio_engine.dart';
 
 void main() {
   testWidgets('曲名・譜面・鍵盤を表示する', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: PracticeScreen(
           piece: twoBeatMelody(),
           audioEngine: RecordingAudioEngine(),
@@ -27,7 +28,7 @@ void main() {
   testWidgets('鍵盤タップで発音する', (tester) async {
     final audio = RecordingAudioEngine();
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: PracticeScreen(piece: twoBeatMelody(), audioEngine: audio),
       ),
     );
@@ -39,7 +40,7 @@ void main() {
   testWidgets('音符をタップするとその位置から再生する(前の音は鳴らさない)', (tester) async {
     final audio = RecordingAudioEngine();
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: PracticeScreen(piece: twoBeatMelody(), audioEngine: audio),
       ),
     );
@@ -64,7 +65,7 @@ void main() {
   testWidgets('選択音符を再タップで解除し、先頭から再生する', (tester) async {
     final audio = RecordingAudioEngine();
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: PracticeScreen(piece: twoBeatMelody(), audioEngine: audio),
       ),
     );
@@ -95,7 +96,7 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: PracticeScreen(piece: piece, audioEngine: RecordingAudioEngine()),
       ),
     );
@@ -116,7 +117,7 @@ void main() {
 
   testWidgets('fullNotes が無い曲は両手トグルが出ない', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: PracticeScreen(
           piece: twoBeatMelody(),
           audioEngine: RecordingAudioEngine(),
@@ -128,7 +129,7 @@ void main() {
 
   testWidgets('再生ボタンで再生→停止できる(保留タイマーを残さない)', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         home: PracticeScreen(
           piece: twoBeatMelody(),
           audioEngine: RecordingAudioEngine(),

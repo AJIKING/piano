@@ -1,0 +1,9 @@
+# 多言語リソース(ARB)→ AppLocalizations 生成設定。
+# 生成: flutter gen-l10n(`flutter pub get` でも generate: true により実行される)。
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-dir: lib/l10n
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+# AppLocalizations.of(context) を非 null で返す(未提供なら例外=設定漏れに気づける)。
+nullable-getter: false

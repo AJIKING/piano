@@ -127,6 +127,19 @@ void main() {
     });
   });
 
+  group('Note.letterName（音名 C/D/E …）', () {
+    test('オクターブを除いた音名で返す', () {
+      expect(Note.letterName('C4'), 'C');
+      expect(Note.letterName('A3'), 'A');
+      expect(Note.letterName('G5'), 'G');
+    });
+
+    test('♯ は ♯ 付きで返す', () {
+      expect(Note.letterName('F#4'), 'F♯');
+      expect(Note.letterName('C#2'), 'C♯');
+    });
+  });
+
   group('Note JSON 往復・同値', () {
     test('toJson/fromJson で復元できる', () {
       const note = Note(pitch: 'F#5', beat: 2.5, duration: 0.5);

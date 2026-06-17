@@ -58,12 +58,16 @@ class LibraryController extends ChangeNotifier {
         : piece;
   }
 
-  /// 空の自作曲(「無題の楽譜」)を作成して末尾に追加し、永続化する。
-  Future<Piece> createPiece() async {
+  /// 空の自作曲を作成して末尾に追加し、永続化する。
+  /// 既定の曲名・作曲者は表示言語に合わせて UI から渡す(省略時は日本語)。
+  Future<Piece> createPiece({
+    String title = '無題の楽譜',
+    String composer = '自作',
+  }) async {
     final piece = Piece(
       id: 'user-${_nextUserSeq()}',
-      title: '無題の楽譜',
-      composer: '自作',
+      title: title,
+      composer: composer,
       notes: const [],
       isUserCreated: true,
     );

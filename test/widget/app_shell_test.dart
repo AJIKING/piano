@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../fixtures/fixture_pieces.dart';
 import '../fixtures/in_memory_library_store.dart';
+import '../fixtures/localized_app.dart';
 import '../fixtures/recording_audio_engine.dart';
 
 void main() {
@@ -16,7 +17,10 @@ void main() {
       libraryStore: store,
       audioEngine: RecordingAudioEngine(),
     );
-    return (app: MaterialApp(home: AppShell(dependencies: deps)), store: store);
+    return (
+      app: localizedApp(home: AppShell(dependencies: deps)),
+      store: store,
+    );
   }
 
   testWidgets('レールの 4 タブと初期ライブラリを表示する', (tester) async {

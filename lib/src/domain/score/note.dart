@@ -95,6 +95,13 @@ class Note {
     return '${_solfege[m.group(1)]!}${m.group(2) == '#' ? '♯' : ''}';
   }
 
+  /// 音名(オクターブなし)。`C4`→`C`, `F#5`→`F♯`。言語非依存の表示に使う。
+  static String letterName(String pitch) {
+    final m = _pitchPattern.firstMatch(pitch);
+    if (m == null) return pitch;
+    return '${m.group(1)}${m.group(2) == '#' ? '♯' : ''}';
+  }
+
   /// C からの半音数(C=0, C#=1, …, B=11)。
   static const Map<String, int> _letterSemitone = {
     'C': 0,

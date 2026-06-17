@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../fixtures/fixture_pieces.dart';
 import '../../fixtures/in_memory_library_store.dart';
+import '../../fixtures/localized_app.dart';
 
 void main() {
   LibraryController buildController() => LibraryController(
@@ -17,7 +18,7 @@ void main() {
     LibraryController controller, {
     void Function(Piece)? onOpenPractice,
     void Function(Piece)? onOpenEditor,
-  }) => MaterialApp(
+  }) => localizedApp(
     home: LibraryScreen(
       controller: controller,
       onOpenPractice: onOpenPractice ?? (_) {},

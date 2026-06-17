@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../../domain/audio/audio_engine.dart';
 import '../../domain/score/note.dart';
 import '../theme/etude_theme.dart';
@@ -27,8 +28,8 @@ class _FreeScreenState extends State<FreeScreen> {
       _audioReady = true;
     }
     widget.audioEngine.playNote(pitch);
-    // 「A3」等ではなく音階(ドレミ)で表示する。
-    setState(() => _lastNote = Note.solfege(pitch));
+    // 最後に弾いた音を音名(C / C♯ …。オクターブなし)で表示する。
+    setState(() => _lastNote = Note.letterName(pitch));
   }
 
   @override
@@ -37,11 +38,11 @@ class _FreeScreenState extends State<FreeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('自由演奏'),
+        title: Text(AppLocalizations.of(context).freePlay),
         actions: [
           IconButton(
             icon: const Icon(Icons.open_in_full),
-            tooltip: '全画面',
+            tooltip: AppLocalizations.of(context).fullscreen,
             onPressed: () => setState(() => _fullscreen = true),
           ),
         ],
@@ -67,7 +68,7 @@ class _FreeScreenState extends State<FreeScreen> {
     );
   }
 
-  /// 全画面モード: 鍵盤を画面いっぱいに。右上に終了ボタン、左上に音階表示。
+  /// 全画面モード: 鍵盤を画面いっぱいに。右上に終了ボタン、左上に音名表示。
   Widget _fullscreenView() {
     return Scaffold(
       backgroundColor: EtudeColors.ink,
@@ -89,7 +90,7 @@ class _FreeScreenState extends State<FreeScreen> {
               right: 4,
               child: IconButton(
                 icon: const Icon(Icons.close_fullscreen),
-                tooltip: '全画面を終了',
+                tooltip: AppLocalizations.of(context).exitFullscreen,
                 style: IconButton.styleFrom(
                   backgroundColor: EtudeColors.ink3.withValues(alpha: 0.7),
                   foregroundColor: EtudeColors.ivory2,
@@ -116,9 +117,9 @@ class _FreeScreenState extends State<FreeScreen> {
             color: EtudeColors.brassSoft,
           ),
         ),
-        const Text(
-          '音階',
-          style: TextStyle(
+        Text(
+          AppLocalizations.of(context).noteNameLabel,
+          style: const TextStyle(
             fontSize: 9,
             letterSpacing: 1.4,
             color: EtudeColors.ivory3,
