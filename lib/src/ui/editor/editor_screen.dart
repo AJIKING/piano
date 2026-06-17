@@ -6,6 +6,7 @@ import '../../domain/audio/audio_engine.dart';
 import '../../domain/score/score_geometry.dart';
 import '../theme/etude_theme.dart';
 import '../widgets/piano_keyboard.dart';
+import '../widgets/score_scroll_follower.dart';
 import '../widgets/score_view.dart';
 
 /// 楽譜エディタ(レールの「編集」タブ)。譜面/鍵盤タップで音符を追加・選択し、
@@ -37,14 +38,10 @@ class _EditorScreenState extends State<EditorScreen> {
   late final PracticeController _preview;
   late final TextEditingController _titleField;
   late final Listenable _editAndPreview;
-  final ScrollController _scoreScroll = ScrollController();
+  final ScoreScrollFollower _follow = ScoreScrollFollower();
   double? _lastCaret;
   bool _toolsVisible = true;
   bool _previewing = false;
-
-  /// 試聴中にユーザーが手動スクロールしたら、自動追従を一時停止する。
-  /// 次の試聴開始でリセット。
-  bool _followPaused = false;
 
   EditorController get _editor => widget.controller;
 
@@ -81,7 +78,7 @@ class _EditorScreenState extends State<EditorScreen> {
     _preview.removeListener(_onPreviewChanged);
     _preview.dispose();
     _titleField.dispose();
-    _scoreScroll.dispose();
+    _follow.dispose();
     super.dispose();
   }
 
@@ -93,33 +90,23 @@ class _EditorScreenState extends State<EditorScreen> {
   }
 
   /// 試聴中、再生ヘッドが見切れたら譜面をスクロールして追従する。
-  void _followPlayhead() {
-    if (!_preview.isPlaying || _followPaused) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scoreScroll.hasClients) return;
-      final x = _geometry.xAtBeat(_preview.playheadBeats);
-      final pos = _scoreScroll.position;
-      if (x < pos.pixels + 40 || x > pos.pixels + pos.viewportDimension - 40) {
-        _scoreScroll.animateTo(
-          (x - pos.viewportDimension * 0.5).clamp(0.0, pos.maxScrollExtent),
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
+  /// ただしユーザーが手動スクロール中は [ScoreScrollFollower] 側で追従を止める。
+  void _followPlayhead() => _follow.follow(
+    isActive: () => _preview.isPlaying,
+    targetX: () => _geometry.xAtBeat(_preview.playheadBeats),
+  );
 
   /// 編集でキャレットが動いたら、譜面が見切れないよう自動スクロールする。
   void _keepCaretVisible() {
     if (_editor.insertBeat == _lastCaret) return;
     _lastCaret = _editor.insertBeat;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scoreScroll.hasClients) return;
+      if (!mounted || !_follow.controller.hasClients) return;
       final caretX = _geometry.xAtBeat(_editor.insertBeat);
-      final pos = _scoreScroll.position;
+      final pos = _follow.controller.position;
       if (caretX < pos.pixels + 40 ||
           caretX > pos.pixels + pos.viewportDimension - 40) {
-        _scoreScroll.animateTo(
+        _follow.controller.animateTo(
           (caretX - pos.viewportDimension * 0.6).clamp(
             0.0,
             pos.maxScrollExtent,
@@ -143,7 +130,7 @@ class _EditorScreenState extends State<EditorScreen> {
     if (_preview.isPlaying) {
       _preview.stop();
     } else {
-      _followPaused = false; // 試聴開始で追従を復帰。
+      _follow.resume(); // 試聴開始で追従を復帰。
       _preview.piece = _editor.currentPiece;
       // 音符を選択していればその位置から、無ければ先頭から試聴する。
       final i = _editor.selectedIndex;
@@ -228,12 +215,8 @@ class _EditorScreenState extends State<EditorScreen> {
             builder: (context, _) {
               final previewing = _preview.isPlaying;
               // 試聴中の手動ドラッグで自動追従を止める。
-              return NotificationListener<ScrollStartNotification>(
-                onNotification: (n) {
-                  if (n.dragDetails != null) _followPaused = true;
-                  return false;
-                },
-                child: Padding(
+              return _follow.wrap(
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: ScoreView(
                     piece: _editor.currentPiece,
@@ -248,7 +231,7 @@ class _EditorScreenState extends State<EditorScreen> {
                         : null,
                     snap: _editor.currentDuration,
                     height: 120,
-                    scrollController: _scoreScroll,
+                    scrollController: _follow.controller,
                     // 試聴中は誤編集を避けるためタップを無効化する。
                     onAddAt: previewing
                         ? null

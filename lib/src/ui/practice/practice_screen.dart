@@ -7,6 +7,7 @@ import '../../domain/score/score_geometry.dart';
 import '../theme/etude_theme.dart';
 import '../widgets/grand_staff_view.dart';
 import '../widgets/piano_keyboard.dart';
+import '../widgets/score_scroll_follower.dart';
 import '../widgets/score_view.dart';
 
 /// 練習画面。譜面・テンポ・メトロノーム・再生と、下部の鍵盤。
@@ -27,7 +28,7 @@ class PracticeScreen extends StatefulWidget {
 class _PracticeScreenState extends State<PracticeScreen> {
   static const _geometry = ScoreGeometry();
   late final PracticeController _controller;
-  final ScrollController _scoreScroll = ScrollController();
+  final ScoreScrollFollower _follow = ScoreScrollFollower();
   bool _audioReady = false;
 
   /// 譜面でタップして選んだ「再生開始音符」(正準順インデックス)。
@@ -36,10 +37,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   /// 両手(大譜表＋両手再生)モード。収録曲で fullNotes がある時だけ使える。
   bool _twoHand = false;
-
-  /// 再生中にユーザーが手動スクロールしたら、自動追従を一時停止する
-  /// (見たい所を見続けられるように)。次の再生開始でリセット。
-  bool _followPaused = false;
 
   /// 両手/片手を切り替える。再生対象(controller.piece)も差し替える。
   void _toggleTwoHand() {
@@ -69,27 +66,16 @@ class _PracticeScreenState extends State<PracticeScreen> {
   void dispose() {
     _controller.litPitches.removeListener(_followPlayhead);
     _controller.dispose();
-    _scoreScroll.dispose();
+    _follow.dispose();
     super.dispose();
   }
 
   /// 再生中、再生ヘッドが見切れたら譜面をスクロールして追従する。
-  /// ただしユーザーが手動スクロール中(`_followPaused`)は追従しない。
-  void _followPlayhead() {
-    if (!_controller.isPlaying || _followPaused) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scoreScroll.hasClients) return;
-      final x = _geometry.xAtBeat(_controller.playheadBeats);
-      final pos = _scoreScroll.position;
-      if (x < pos.pixels + 40 || x > pos.pixels + pos.viewportDimension - 40) {
-        _scoreScroll.animateTo(
-          (x - pos.viewportDimension * 0.5).clamp(0.0, pos.maxScrollExtent),
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
+  /// ただしユーザーが手動スクロール中は [ScoreScrollFollower] 側で追従を止める。
+  void _followPlayhead() => _follow.follow(
+    isActive: () => _controller.isPlaying,
+    targetX: () => _geometry.xAtBeat(_controller.playheadBeats),
+  );
 
   void _onKey(String pitch) {
     if (!_audioReady) {
@@ -109,7 +95,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
     if (_controller.isPlaying) {
       _controller.stop();
     } else {
-      _followPaused = false; // 再生開始で追従を復帰。
+      _follow.resume(); // 再生開始で追従を復帰。
       final notes = widget.piece.sortedNotes;
       final i = _startIndex;
       final from = (i != null && i < notes.length) ? notes[i].beat : 0.0;
@@ -148,18 +134,14 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // 手動ドラッグを検知したら自動追従を止める(見たい所を見続ける)。
-                  NotificationListener<ScrollStartNotification>(
-                    onNotification: (n) {
-                      if (n.dragDetails != null) _followPaused = true;
-                      return false;
-                    },
-                    child: Padding(
+                  _follow.wrap(
+                    Padding(
                       padding: const EdgeInsets.fromLTRB(12, 2, 12, 4),
                       child: _twoHand
                           ? GrandStaffView(
                               notes: widget.piece.fullNotes,
                               beatsPerMeasure: widget.piece.beatsPerMeasure,
-                              scrollController: _scoreScroll,
+                              scrollController: _follow.controller,
                               litNoteIndices: playing
                                   ? _controller.litNoteIndices
                                   : const {},
@@ -168,7 +150,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                           : ScoreView(
                               piece: widget.piece,
                               geometry: _geometry,
-                              scrollController: _scoreScroll,
+                              scrollController: _follow.controller,
                               litNoteIndices: playing
                                   ? _controller.litNoteIndices
                                   : const {},
