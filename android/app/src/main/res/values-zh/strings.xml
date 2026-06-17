@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 簡体字中国語。zh-TW 等もここにフォールバックする(アプリ内と同じ方針)。 -->
+<resources>
+    <string name="app_name">钢琴笔记</string>
+</resources>

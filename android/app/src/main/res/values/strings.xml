@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 既定(端末ロケールが ja/zh 以外)のアプリ表示名。アプリ内の言語フォールバックと同じ英語。 -->
+<resources>
+    <string name="app_name">Piano Note</string>
+</resources>
