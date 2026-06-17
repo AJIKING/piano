@@ -14,8 +14,8 @@ void main() {
     expect(repo.samplePieces(), isNotEmpty);
   });
 
-  test('既定シードは 18 曲', () {
-    expect(allPieces(), hasLength(18));
+  test('既定シードは 11 曲', () {
+    expect(allPieces(), hasLength(11));
   });
 
   test('拍子・既定テンポが妥当', () {
@@ -25,17 +25,11 @@ void main() {
     }
   });
 
-  test('fullNotes(両手フル譜面)は妥当で、実データ3曲が持つ', () {
-    final withFull = allPieces()
-        .where((p) => p.fullNotes.isNotEmpty)
-        .map((p) => p.id)
-        .toList();
-    expect(
-      withFull,
-      containsAll(['fur-elise', 'gymnopedie-1', 'bwv846', 'prelude-e-minor']),
-    );
-    // fullNotes は音域(C3–B5)に縛られないが、音名・音価・非負拍は妥当であること。
+  test('収録曲は単旋律(fullNotes を持たない)。あっても妥当', () {
+    // 現行データはパブリックドメインの童謡・唱歌で、片手の単旋律のみ。
     for (final p in allPieces()) {
+      expect(p.fullNotes, isEmpty, reason: p.id);
+      // 将来 fullNotes を足す場合も、音名・音価・非負拍は妥当であること。
       for (final n in p.fullNotes) {
         expect(n.isValid, isTrue, reason: '${p.id}: $n');
       }

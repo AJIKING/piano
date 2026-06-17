@@ -1,0 +1,179 @@
+{
+  "schema": {
+    "note": "音名は科学的音高表記（C4 = 中央ド / 真ん中のド）。duration は4分音符を1.0とした拍数。timeSignature は拍子。これらはすべて著作権の切れた（パブリックドメインの）伝承曲・古典曲の主旋律を簡易な単旋律で表したものです。民謡は地域・楽譜によって細部が異なります。",
+    "pitch_format": "<音名><オクターブ>",
+    "duration_unit": "quarter_note = 1.0"
+  },
+  "songs": [
+    {
+      "id": "featured",
+      "title": "きらきら星",
+      "origin": "フランス民謡 (Ah! vous dirai-je, maman / Twinkle Twinkle Little Star)",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 100,
+      "melody": [
+        {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 2},
+        {"note": "G4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 2},
+        {"note": "G4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 2},
+        {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 2}
+      ]
+    },
+    {
+      "id": 1,
+      "title": "ちょうちょう",
+      "origin": "ドイツ民謡",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 108,
+      "melody": [
+        {"note": "G4", "dur": 2}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1},
+        {"note": "F4", "dur": 2}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1},
+        {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1},
+        {"note": "G4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "G4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1},
+        {"note": "F4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1},
+        {"note": "C4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "G4", "dur": 1},
+        {"note": "E4", "dur": 4}
+      ]
+    },
+    {
+      "id": 2,
+      "title": "かえるの合唱",
+      "origin": "ドイツ民謡",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 100,
+      "melody": [
+        {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 2},
+        {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 2},
+        {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1},
+        {"note": "C4", "dur": 0.5}, {"note": "D4", "dur": 0.5}, {"note": "E4", "dur": 0.5}, {"note": "F4", "dur": 0.5}, {"note": "E4", "dur": 0.5}, {"note": "D4", "dur": 0.5}, {"note": "C4", "dur": 1}
+      ]
+    },
+    {
+      "id": 3,
+      "title": "メリーさんの羊",
+      "origin": "アメリカ民謡 (Mary Had a Little Lamb)",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 110,
+      "melody": [
+        {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 2},
+        {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 2}, {"note": "E4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1},
+        {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 4}
+      ]
+    },
+    {
+      "id": 4,
+      "title": "ロンドン橋",
+      "origin": "イギリス民謡 (London Bridge Is Falling Down)",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 112,
+      "melody": [
+        {"note": "G4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 2}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "G4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "D4", "dur": 2}, {"note": "G4", "dur": 2}, {"note": "E4", "dur": 2}, {"note": "C4", "dur": 2}
+      ]
+    },
+    {
+      "id": 5,
+      "title": "ゆかいなまきば",
+      "origin": "アメリカ民謡 (Old MacDonald Had a Farm)",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 120,
+      "melody": [
+        {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 4},
+        {"note": "G4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "G4", "dur": 1},
+        {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 4}
+      ]
+    },
+    {
+      "id": 6,
+      "title": "聖者の行進",
+      "origin": "アメリカ民謡 (When the Saints Go Marching In)",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 116,
+      "melody": [
+        {"note": "C4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "G4", "dur": 2.5},
+        {"note": "C4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "G4", "dur": 2.5},
+        {"note": "C4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 2},
+        {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "G4", "dur": 2},
+        {"note": "G4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 3}
+      ]
+    },
+    {
+      "id": 7,
+      "title": "茶色の小瓶",
+      "origin": "J. ウィナー (Joseph Winner, 1869 / Little Brown Jug)",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 132,
+      "note": "コーラス（最も有名な部分）の主旋律。編曲により細部の差があります。",
+      "melody": [
+        {"note": "C5", "dur": 1}, {"note": "C5", "dur": 1}, {"note": "C5", "dur": 1}, {"note": "A4", "dur": 1},
+        {"note": "C5", "dur": 1}, {"note": "C5", "dur": 1}, {"note": "C5", "dur": 1}, {"note": "A4", "dur": 1},
+        {"note": "C5", "dur": 1}, {"note": "C5", "dur": 1}, {"note": "C5", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "C5", "dur": 1}, {"note": "A4", "dur": 1}, {"note": "G4", "dur": 2}
+      ]
+    },
+    {
+      "id": 8,
+      "title": "アルプス一万尺",
+      "origin": "アメリカ民謡 (Yankee Doodle)",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 124,
+      "melody": [
+        {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 2},
+        {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "C4", "dur": 2}, {"note": "B3", "dur": 2},
+        {"note": "C4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 1},
+        {"note": "B3", "dur": 1}, {"note": "G3", "dur": 1}, {"note": "A3", "dur": 1}, {"note": "B3", "dur": 1}, {"note": "C4", "dur": 4}
+      ]
+    },
+    {
+      "id": 9,
+      "title": "ジングルベル",
+      "origin": "J. ピアポント (James Pierpont, 1857 / Jingle Bells)",
+      "key": "C",
+      "timeSignature": "4/4",
+      "tempo": 120,
+      "note": "コーラス部分。",
+      "melody": [
+        {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 2}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 2},
+        {"note": "E4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 4},
+        {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1},
+        {"note": "E4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "D4", "dur": 2}, {"note": "G4", "dur": 2},
+        {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 2}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 2},
+        {"note": "E4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "C4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "E4", "dur": 4},
+        {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1}, {"note": "E4", "dur": 1},
+        {"note": "G4", "dur": 1}, {"note": "G4", "dur": 1}, {"note": "F4", "dur": 1}, {"note": "D4", "dur": 1}, {"note": "C4", "dur": 4}
+      ]
+    },
+    {
+      "id": 10,
+      "title": "きよしこの夜",
+      "origin": "F. グルーバー (Franz Gruber, 1818 / Silent Night)",
+      "key": "C",
+      "timeSignature": "3/4",
+      "tempo": 72,
+      "melody": [
+        {"note": "G4", "dur": 1.5}, {"note": "A4", "dur": 0.5}, {"note": "G4", "dur": 1}, {"note": "E4", "dur": 3},
+        {"note": "G4", "dur": 1.5}, {"note": "A4", "dur": 0.5}, {"note": "G4", "dur": 1}, {"note": "E4", "dur": 3},
+        {"note": "D5", "dur": 2}, {"note": "D5", "dur": 1}, {"note": "B4", "dur": 3},
+        {"note": "C5", "dur": 2}, {"note": "C5", "dur": 1}, {"note": "G4", "dur": 3},
+        {"note": "A4", "dur": 2}, {"note": "A4", "dur": 1}, {"note": "C5", "dur": 2}, {"note": "B4", "dur": 1}, {"note": "A4", "dur": 2}, {"note": "G4", "dur": 1}, {"note": "E4", "dur": 3},
+        {"note": "A4", "dur": 2}, {"note": "A4", "dur": 1}, {"note": "C5", "dur": 2}, {"note": "B4", "dur": 1}, {"note": "A4", "dur": 2}, {"note": "G4", "dur": 1}, {"note": "E4", "dur": 3},
+        {"note": "D5", "dur": 2}, {"note": "D5", "dur": 1}, {"note": "F5", "dur": 2}, {"note": "D5", "dur": 1}, {"note": "B4", "dur": 3}, {"note": "C5", "dur": 3},
+        {"note": "C5", "dur": 2}, {"note": "G4", "dur": 1}, {"note": "E4", "dur": 2}, {"note": "C4", "dur": 1}, {"note": "C4", "dur": 3}
+      ]
+    }
+  ]
+}

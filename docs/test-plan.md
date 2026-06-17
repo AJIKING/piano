@@ -23,7 +23,7 @@
 | 再生(`PracticeController`) | 拍ベースで発音時刻を進める / 音価が発音間隔・余韻(sustain)に反映 / 末尾+余韻で停止 / 再生中のテンポ変更が即反映 / 和音(同 beat)を全て発音 / 鳴っている音高(`litPitch`)/ すべて fake_async で実時間を使わない |
 | メトロノーム(`PracticeController`) | 1 拍ごとのクリック / 拍頭の強拍判定(曲の拍子 `beatsPerMeasure`) |
 | 楽譜編集(`EditorController`) | 音符追加で beat 昇順に整列 / 選択音符の音価・♯ 変更 / 削除・全消去 / キャレット前進・末尾へ / 戻る・進む(undo/redo)/ 初期版へ戻す(収録曲のみ)/ ♯ は黒鍵を持つ音名のみ / step→音名(`Note.pitchForStep`) |
-| 収録曲データ検証 | `pitch` が妥当な音名 / `duration` が許容音価 / `beat` 非負・整列可能 / `id` 一意 / 既定 10 曲 / `beatsPerMeasure` 2–4・`defaultBpm` 40–160 / 音域が鍵盤(C3–B5)内(全収録曲に対する contract test) |
+| 収録曲データ検証 | `pitch` が妥当な音名 / `duration` が許容音価 / `beat` 非負・整列可能 / `id` 一意 / 既定 11 曲 / `beatsPerMeasure` 2–4・`defaultBpm` 40–160 / 音域が鍵盤(C3–B5)内(全収録曲に対する contract test) |
 | ライブラリ状態(`LibraryController`) | 収録曲+ユーザー曲の結合(featured も一覧に含む)/ 新規作成・編集保存が永続化される / snapshot 往復・旧データ互換(featured 補完) |
 
 ## Widget test(`test/widget/`)
