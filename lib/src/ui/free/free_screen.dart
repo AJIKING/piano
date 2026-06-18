@@ -86,6 +86,8 @@ class _FreeScreenState extends State<FreeScreen> {
                   startOctave: 2,
                   octaveCount: 4,
                   height: constraints.maxHeight,
+                  // 全画面は「大きく弾く」モード: 鍵を高さに合わせて大きくし横スクロール。
+                  expand: true,
                 ),
               ),
             ),

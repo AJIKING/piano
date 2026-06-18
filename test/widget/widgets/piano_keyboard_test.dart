@@ -114,4 +114,29 @@ void main() {
     final key = tester.getRect(find.byKey(const ValueKey('key-C3')));
     expect(key.bottom, moreOrLessEquals(board.bottom, epsilon: 1));
   });
+
+  testWidgets('expand(全画面)は鍵を大きくして横スクロールする', (tester) async {
+    tester.view.physicalSize = const Size(1366, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PianoKeyboard(
+            onNotePressed: (_) {},
+            startOctave: 2,
+            octaveCount: 4,
+            height: 700,
+            expand: true,
+          ),
+        ),
+      ),
+    );
+    // 通常(敷き詰め)なら 1366/28≈49px だが、expand では高さ基準で大きくなる(〜96px)。
+    final w = tester.getSize(find.byKey(const ValueKey('key-C2'))).width;
+    expect(w, greaterThan(80));
+    // 大きいので画面に収まらず横スクロールになる。
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+  });
 }

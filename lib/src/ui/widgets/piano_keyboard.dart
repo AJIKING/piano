@@ -13,6 +13,7 @@ class PianoKeyboard extends StatelessWidget {
     this.maxWhiteKeyWidth = 72,
     this.blackKeyWidth = 26,
     this.height = 150,
+    this.expand = false,
     this.litPitches = const {},
   });
 
@@ -31,8 +32,15 @@ class PianoKeyboard extends StatelessWidget {
   /// 頭打ちにして、縦に間延びしないようにする。
   final double height;
 
+  /// 「大きく弾く」モード(全画面など)。鍵を高さに合わせて大きくし、画面に
+  /// 収まらなければ横スクロールする。false のときは全鍵が幅に収まるよう敷き詰める。
+  final bool expand;
+
   /// 白鍵の高さ/幅の比(ピアノらしい縦横比の上限)。
   static const double _heightToWidthRatio = 5.0;
+
+  /// expand 時の白鍵の最大幅(大きくしすぎて 1〜2 鍵しか見えないのを防ぐ)。
+  static const double _expandMaxWhiteKeyWidth = 96;
 
   /// 光らせる(鳴っている)音高。再生/試聴中のハイライト用。
   final Set<String> litPitches;
@@ -60,12 +68,19 @@ class PianoKeyboard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 画面幅に合わせて白鍵幅を決める。広い端末(タブレット)は鍵を広げて画面を
-        // 活かし、狭ければ既定幅のまま横スクロールする。
         final available = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : n * whiteKeyWidth;
-        final keyW = (available / n).clamp(whiteKeyWidth, maxWhiteKeyWidth);
+        // 鍵幅の決め方:
+        // - expand(全画面など): 与えられた高さに合わせて鍵を大きくし(比率を保つ)、
+        //   はみ出せば横スクロール。「大きく弾く」用。
+        // - 通常: 全鍵が画面幅に収まるよう敷き詰める(端末幅に追従)。
+        final keyW = expand
+            ? (height / _heightToWidthRatio).clamp(
+                whiteKeyWidth,
+                _expandMaxWhiteKeyWidth,
+              )
+            : (available / n).clamp(whiteKeyWidth, maxWhiteKeyWidth);
         final blackW = blackKeyWidth * (keyW / whiteKeyWidth);
         final boardWidth = n * keyW;
         // 鍵幅に対して縦に間延びしないよう、描画高さを比率で頭打ちにする。
