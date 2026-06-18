@@ -10,6 +10,7 @@ class PianoKeyboard extends StatelessWidget {
     this.startOctave = 3,
     this.octaveCount = 3,
     this.whiteKeyWidth = 40,
+    this.maxWhiteKeyWidth = 72,
     this.blackKeyWidth = 26,
     this.height = 150,
     this.litPitches = const {},
@@ -18,9 +19,20 @@ class PianoKeyboard extends StatelessWidget {
   final void Function(String pitch) onNotePressed;
   final int startOctave;
   final int octaveCount;
+
+  /// 白鍵の最小幅(=既定幅)。画面が狭ければこの幅で横スクロールする。
   final double whiteKeyWidth;
+
+  /// 白鍵の最大幅。タブレット等で広げすぎないための上限。
+  final double maxWhiteKeyWidth;
   final double blackKeyWidth;
+
+  /// 鍵盤に与えられる高さ(利用可能高さ)。実際の描画高さは鍵幅に対する比率で
+  /// 頭打ちにして、縦に間延びしないようにする。
   final double height;
+
+  /// 白鍵の高さ/幅の比(ピアノらしい縦横比の上限)。
+  static const double _heightToWidthRatio = 5.0;
 
   /// 光らせる(鳴っている)音高。再生/試聴中のハイライト用。
   final Set<String> litPitches;
@@ -44,34 +56,44 @@ class PianoKeyboard extends StatelessWidget {
         whites.add((pitch: '$letter$octave', letter: letter, octave: octave));
       }
     }
+    final n = whites.length;
 
-    final blackKeys = <Widget>[];
-    for (var i = 0; i < whites.length; i++) {
-      final black = _blackAfter[whites[i].letter];
-      if (black == null) continue;
-      final pitch = '$black${whites[i].octave}';
-      blackKeys.add(
-        Positioned(
-          left: (i + 1) * whiteKeyWidth - blackKeyWidth / 2,
-          top: 0,
-          child: _BlackKey(
-            pitch: pitch,
-            width: blackKeyWidth,
-            height: height * 0.62,
-            lit: litPitches.contains(pitch),
-            onPressed: () => onNotePressed(pitch),
-          ),
-        ),
-      );
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 画面幅に合わせて白鍵幅を決める。広い端末(タブレット)は鍵を広げて画面を
+        // 活かし、狭ければ既定幅のまま横スクロールする。
+        final available = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : n * whiteKeyWidth;
+        final keyW = (available / n).clamp(whiteKeyWidth, maxWhiteKeyWidth);
+        final blackW = blackKeyWidth * (keyW / whiteKeyWidth);
+        final boardWidth = n * keyW;
+        // 鍵幅に対して縦に間延びしないよう、描画高さを比率で頭打ちにする。
+        final boardHeight = height.clamp(0.0, keyW * _heightToWidthRatio);
 
-    return SizedBox(
-      height: height,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: whites.length * whiteKeyWidth,
-          height: height,
+        final blackKeys = <Widget>[];
+        for (var i = 0; i < n; i++) {
+          final black = _blackAfter[whites[i].letter];
+          if (black == null) continue;
+          final pitch = '$black${whites[i].octave}';
+          blackKeys.add(
+            Positioned(
+              left: (i + 1) * keyW - blackW / 2,
+              top: 0,
+              child: _BlackKey(
+                pitch: pitch,
+                width: blackW,
+                height: boardHeight * 0.62,
+                lit: litPitches.contains(pitch),
+                onPressed: () => onNotePressed(pitch),
+              ),
+            ),
+          );
+        }
+
+        final board = SizedBox(
+          width: boardWidth,
+          height: boardHeight,
           child: Stack(
             children: [
               // Positioned.fill + stretch で白鍵を高さいっぱいに伸ばす。
@@ -82,7 +104,7 @@ class PianoKeyboard extends StatelessWidget {
                     for (final w in whites)
                       _WhiteKey(
                         pitch: w.pitch,
-                        width: whiteKeyWidth,
+                        width: keyW,
                         label: w.letter == 'C' ? w.pitch : null,
                         lit: litPitches.contains(w.pitch),
                         onPressed: () => onNotePressed(w.pitch),
@@ -93,8 +115,23 @@ class PianoKeyboard extends StatelessWidget {
               ...blackKeys,
             ],
           ),
-        ),
-      ),
+        );
+
+        // 収まる時はそのまま(下端の Align が横中央寄せも兼ねる)、はみ出す時は
+        // 横スクロール。いずれも下の Align で画面下端に揃える。
+        final content = boardWidth <= available + 0.5
+            ? board
+            : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: board,
+              );
+
+        return SizedBox(
+          height: height,
+          width: double.infinity,
+          child: Align(alignment: Alignment.bottomCenter, child: content),
+        );
+      },
     );
   }
 }

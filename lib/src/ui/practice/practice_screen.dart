@@ -181,18 +181,19 @@ class _PracticeScreenState extends State<PracticeScreen> {
             const Spacer()
           else ...[
             const Divider(height: 1),
-            // 鍵盤は「鳴る音が変わった時」だけ再構築する(毎フレーム再構築を避ける)。
+            // 鍵盤は利用可能高さに追従する(タブレットでは大きく、画面下端に揃える)。
+            // 鳴る音が変わった時だけ再構築する(毎フレーム再構築を避ける)。
             Expanded(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: ValueListenableBuilder<Set<String>>(
-                  valueListenable: _controller.litPitches,
-                  builder: (context, lit, _) => PianoKeyboard(
-                    onNotePressed: _onKey,
-                    height: 160,
-                    litPitches: lit,
-                  ),
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) =>
+                    ValueListenableBuilder<Set<String>>(
+                      valueListenable: _controller.litPitches,
+                      builder: (context, lit, _) => PianoKeyboard(
+                        onNotePressed: _onKey,
+                        height: constraints.maxHeight,
+                        litPitches: lit,
+                      ),
+                    ),
               ),
             ),
           ],

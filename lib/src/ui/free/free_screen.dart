@@ -57,11 +57,15 @@ class _FreeScreenState extends State<FreeScreen> {
               child: _lastNoteLabel(),
             ),
           ),
+          // 鍵盤は画面高さに追従(タブレットでは大きく)。鍵盤側で縦横比に頭打ちする。
           PianoKeyboard(
             onNotePressed: _onNote,
             startOctave: 2,
             octaveCount: 4,
-            height: 170,
+            height: (MediaQuery.sizeOf(context).height * 0.55).clamp(
+              160.0,
+              340.0,
+            ),
           ),
         ],
       ),
