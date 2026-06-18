@@ -1,11 +1,14 @@
+import 'package:etude/src/application/editor_controller.dart';
 import 'package:etude/src/application/library_controller.dart';
 import 'package:etude/src/data/bundled_score_repository.dart';
+import 'package:etude/src/ui/editor/editor_screen.dart';
 import 'package:etude/src/ui/library/library_screen.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../fixtures/in_memory_library_store.dart';
 import '../../fixtures/localized_app.dart';
+import '../../fixtures/recording_audio_engine.dart';
 
 /// 多言語対応(日本語 / 英語 / 簡体字中国語)の検証。
 /// ロケールに応じて UI 文言と収録曲名が切り替わることを確認する。
@@ -49,5 +52,27 @@ void main() {
     expect(find.text('新建乐谱'), findsOneWidget);
     expect(find.text('小星星'), findsOneWidget);
     expect(find.text('法国民谣'), findsWidgets);
+  });
+
+  testWidgets('エディタの曲名入力欄も収録曲は表示言語で出る', (tester) async {
+    // 収録曲(featured = きらきら星 / twinkle-star)を英語で編集画面に開く。
+    final editor = EditorController(
+      piece: const BundledScoreRepository().featured(),
+    );
+    await tester.pumpWidget(
+      localizedApp(
+        home: EditorScreen(
+          controller: editor,
+          audioEngine: RecordingAudioEngine(),
+        ),
+        locale: const Locale('en'),
+      ),
+    );
+    // タイトル入力欄が日本語ではなく英語の曲名で初期表示される。
+    expect(
+      find.widgetWithText(TextField, 'Twinkle Twinkle Little Star'),
+      findsOneWidget,
+    );
+    expect(find.text('きらきら星'), findsNothing);
   });
 }

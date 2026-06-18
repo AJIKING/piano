@@ -5,6 +5,7 @@ import '../../application/editor_controller.dart';
 import '../../application/practice_controller.dart';
 import '../../domain/audio/audio_engine.dart';
 import '../../domain/score/score_geometry.dart';
+import '../i18n/piece_labels.dart';
 import '../theme/etude_theme.dart';
 import '../widgets/piano_keyboard.dart';
 import '../widgets/score_scroll_follower.dart';
@@ -75,6 +76,8 @@ class _EditorScreenState extends State<EditorScreen> {
       audioEngine: widget.audioEngine,
       bpm: _editor.currentPiece.defaultBpm.toDouble(),
     );
+    // 初期値。表示言語に合わせた曲名は didChangeDependencies でセットする
+    // (initState では Localizations をまだ参照できないため)。
     _titleField = TextEditingController(text: _editor.title);
     _editAndPreview = Listenable.merge([_editor, _preview]);
     _editor.addListener(_keepCaretVisible);
@@ -82,6 +85,23 @@ class _EditorScreenState extends State<EditorScreen> {
     // 鳴る音が変わるたびに(=毎フレームではなく)再生ヘッドを追従させる。
     _preview.litPitches.addListener(_followPlayhead);
   }
+
+  bool _titleSeeded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 収録曲は曲名を表示言語に解決して入力欄へ反映する(自作曲はユーザーの曲名のまま)。
+    // State は曲ごとに作り直されるため、各曲につき初回だけ反映すれば足りる。
+    if (!_titleSeeded) {
+      _titleSeeded = true;
+      final shown = _displayTitle();
+      if (_titleField.text != shown) _titleField.text = shown;
+    }
+  }
+
+  /// 入力欄に表示する曲名。収録曲は表示言語の曲名、自作曲は保存中の曲名。
+  String _displayTitle() => localizedPieceTitle(context, _editor.currentPiece);
 
   @override
   void dispose() {
@@ -164,7 +184,7 @@ class _EditorScreenState extends State<EditorScreen> {
 
   /// undo/redo/reset で曲名が変わったら入力欄へ反映する(タイピングには干渉しない)。
   void _syncTitleField() {
-    final text = _editor.title;
+    final text = _displayTitle();
     if (_titleField.text == text) return;
     _titleField.value = TextEditingValue(
       text: text,
